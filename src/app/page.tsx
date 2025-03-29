@@ -3,11 +3,11 @@ import { FilmIcon, Search } from "lucide-react";
 import { MovieRecommendations } from "@/components/MovieRecommendations";
 import { Suspense } from "react";
 
-export default function Home({ searchParams }: { searchParams: { query?: string } }) {
-  const searchQuery = searchParams.query || "";
+export default async function Home({ searchParams }: { searchParams: { query?: string } }) {
+  const searchQuery = (await searchParams.query) || "";
 
   return (
-    <main className="p-6 md:p-12 lg:p-24 flex flex-col justify-between min-h-screen max-w-4xl mx-auto">
+    <main className="p-6 md:p-12 lg:p-24 flex flex-col gap-28 justify-between min-h-screen max-w-4xl mx-auto">
       <div className="space-y-8 text-center items-center">
         <div className="flex flex-row justify-center items-center gap-3">
           <FilmIcon className="h-12 w-12 text-primary" />
@@ -37,18 +37,16 @@ export default function Home({ searchParams }: { searchParams: { query?: string 
             </button>
           </div>
         </form>
-
-        <Suspense
-          fallback={
-            <div className="py-12 text-center">
-              <p className="text-muted-foreground">Loading recommendations...</p>
-            </div>
-          }
-        >
-          <MovieRecommendations searchQuery={searchQuery} />
-        </Suspense>
       </div>
-      <div className="py-6" />
+      <Suspense
+        fallback={
+          <div className="py-12 text-center">
+            <p className="text-muted-foreground">Loading recommendations...</p>
+          </div>
+        }
+      >
+        <MovieRecommendations searchQuery={searchQuery} />
+      </Suspense>
     </main>
   );
 }
