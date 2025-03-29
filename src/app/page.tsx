@@ -4,10 +4,11 @@ import { MovieRecommendations } from "@/components/MovieRecommendations";
 import { Suspense } from "react";
 
 export default async function Home({ searchParams }: { searchParams: { query?: string } }) {
-  const searchQuery = (await searchParams.query) || "";
+  const params = await searchParams;
+  const searchQuery = params.query || "";
 
   return (
-    <main className="p-6 md:p-12 lg:p-24 flex flex-col gap-28 justify-between min-h-screen max-w-4xl mx-auto">
+    <main className="p-6 md:p-12 lg:p-24 flex flex-col gap-28 justify-between min-h-screen max-w-[80%] mx-auto">
       <div className="space-y-8 text-center items-center">
         <div className="flex flex-row justify-center items-center gap-3">
           <FilmIcon className="h-12 w-12 text-primary" />
