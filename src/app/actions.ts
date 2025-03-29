@@ -1,13 +1,20 @@
 "use server";
 
 import { geminiModel } from "@/lib/gemini";
+import { generateObject } from "ai";
+import { z } from "zod";
 
-export interface MovieRecommendation {
-  title: string;
-  year: string;
-  genre: string;
-  description: string;
-}
+// Create a Zod schema for movie recommendations
+const MovieRecommendationSchema = z.object({
+  title: z.string(),
+  year: z.string(),
+  genre: z.string(),
+  description: z.string(),
+});
+
+const MovieRecommendationsSchema = z.array(MovieRecommendationSchema);
+
+export type MovieRecommendation = z.infer<typeof MovieRecommendationSchema>;
 
 export async function getMovieRecommendations(prompt: string): Promise<MovieRecommendation[]> {
   try {
@@ -25,17 +32,18 @@ export async function getMovieRecommendations(prompt: string): Promise<MovieReco
     `;
 
     // Combine system prompt with user query
-    const result = await geminiModel.generateContent([systemPrompt, `User query: ${prompt}`]);
+    const { object } = await generateObject({
+      model: geminiModel,
+      system: systemPrompt,
+      prompt: `User query: ${prompt}`,
+      schema: MovieRecommendationsSchema,
+    });
 
-    const text = result.response.text();
+    if (!object || object.length === 0) {
+      throw new Error("No recommendations found");
+    }
 
-    // Extract JSON from the response
-    const jsonStr = text.replace(/```json|```/g, "").trim();
-
-    // Parse the JSON
-    const recommendations = JSON.parse(jsonStr) as MovieRecommendation[];
-
-    return recommendations.slice(0, 5); // Ensure we only return max 5 recommendations
+    return object;
   } catch (error) {
     console.error("Error getting movie recommendations:", error);
     return []; // Return empty array on error
