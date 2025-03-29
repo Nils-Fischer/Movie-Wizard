@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { FilmIcon, Search } from "lucide-react";
 import { MovieRecommendations } from "@/components/MovieRecommendations";
+import { ScrollToComponent } from "@/components/ScrollToComponent";
 import { Suspense } from "react";
 
 export default async function Home({ searchParams }: { searchParams: { query?: string } }) {
@@ -46,7 +47,9 @@ export default async function Home({ searchParams }: { searchParams: { query?: s
           </div>
         }
       >
-        <MovieRecommendations searchQuery={searchQuery} />
+        <ScrollToComponent>
+          <MovieRecommendations searchQuery={searchQuery} />
+        </ScrollToComponent>
       </Suspense>
     </main>
   );
