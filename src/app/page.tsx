@@ -40,17 +40,21 @@ export default async function Home({ searchParams }: { searchParams: { query?: s
           </div>
         </form>
       </div>
-      <Suspense
-        fallback={
-          <div className="py-12 text-center">
-            <p className="text-muted-foreground">Loading recommendations...</p>
-          </div>
-        }
-      >
-        <ScrollToComponent>
-          <MovieRecommendations searchQuery={searchQuery} />
-        </ScrollToComponent>
-      </Suspense>
+      {searchQuery ? (
+        <Suspense
+          fallback={
+            <div className="py-12 text-center">
+              <p className="text-muted-foreground">Loading recommendations...</p>
+            </div>
+          }
+        >
+          <ScrollToComponent>
+            <MovieRecommendations searchQuery={searchQuery} />
+          </ScrollToComponent>
+        </Suspense>
+      ) : (
+        <div className="py-12 text-center" />
+      )}
     </main>
   );
 }

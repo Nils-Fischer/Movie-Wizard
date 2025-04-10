@@ -21,7 +21,7 @@ export async function getMovieRecommendations(prompt: string): Promise<MovieReco
     // Create a system prompt that instructs Gemini to provide movie recommendations
     const systemPrompt = `
       You are a knowledgeable movie recommender. Based on the user's query, 
-      recommend 5 movies that match their preferences. 
+      recommend exactly 9 movies that match their preferences. 
       Format your answer as a JSON array with objects containing:
       - title: the movie title
       - year: the release year
