@@ -1,6 +1,7 @@
-import { getMovieRecommendations, MovieRecommendation } from "@/app/actions";
+import { getMovieMetadata, getMovieRecommendations, MovieRecommendation, OmdbMovieData } from "@/app/actions";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 interface MovieRecommendationsProps {
   searchQuery: string;
@@ -18,6 +19,9 @@ export async function MovieRecommendations({ searchQuery }: MovieRecommendations
 
   // Fetch movie recommendations using the server action
   const recommendations = await getMovieRecommendations(searchQuery);
+  const metadata = await Promise.all(
+    recommendations.map(async (movie) => await getMovieMetadata(movie.title, movie.year))
+  );
 
   // Display a message if no recommendations were found
   if (recommendations.length === 0) {
@@ -34,20 +38,29 @@ export async function MovieRecommendations({ searchQuery }: MovieRecommendations
       <h2 className="text-4xl font-semibold">Recommended Movies</h2>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {recommendations.map((movie, index) => (
-          <MovieCard key={index} movie={movie} />
+          <MovieCard key={index} movie={movie} metadata={metadata[index] ?? undefined} />
         ))}
       </div>
     </div>
   );
 }
 
-function MovieCard({ movie }: { movie: MovieRecommendation }) {
+function MovieCard({ movie, metadata }: { movie: MovieRecommendation; metadata?: OmdbMovieData }) {
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-lg">
-      <div className="bg-muted relative h-48 w-full p-4">
-        {/* Placeholder for movie image - will be replaced with actual API image later */}
+    <Card className="overflow-hidden pt-0 transition-shadow hover:shadow-lg">
+      <div className="bg-muted relative h-100 w-full p-4">
         <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
-          <span className="text-sm">Movie poster coming soon</span>
+          {metadata?.Poster ? (
+            <Image
+              src={metadata.Poster}
+              alt={movie.title}
+              width={500}
+              height={750}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="text-sm">No poster available</span>
+          )}
         </div>
       </div>
 
