@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { OmdbMovieData, MovieRecommendation } from "@/lib/movieTypes";
+import { Loader2 } from "lucide-react";
 
-export function MovieCard({ movie, metadata }: { movie: MovieRecommendation; metadata?: OmdbMovieData }) {
+export function MovieCard({ movie, metadata }: { movie: MovieRecommendation; metadata?: OmdbMovieData | null }) {
   return (
     <Card className="overflow-hidden pt-0 transition-shadow hover:shadow-lg">
       <div className="bg-muted relative h-100 w-full p-4">
@@ -16,8 +17,10 @@ export function MovieCard({ movie, metadata }: { movie: MovieRecommendation; met
               height={750}
               className="h-full w-full object-cover"
             />
+          ) : metadata === null ? (
+            <div className="text-sm">No poster available</div>
           ) : (
-            <span className="text-sm">No poster available</span>
+            <Loader2 className="h-8 w-8 animate-spin" />
           )}
         </div>
       </div>
