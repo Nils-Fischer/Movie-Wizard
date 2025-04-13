@@ -2,7 +2,7 @@
 
 import { getMovieMetadata } from "@/app/actions";
 import { MovieCard } from "./MovieCard";
-import { MovieRecommendation, MovieRecommendationsSchema } from "@/lib/movieTypes";
+import { MovieRecommendation, MovieRecommendationSchema, MovieRecommendationsSchema } from "@/lib/movieTypes";
 import { createStreamableUI } from "ai/rsc";
 import { geminiModel } from "@/lib/gemini";
 import { streamObject } from "ai";
@@ -49,21 +49,31 @@ export async function streamMovieRecommendationsUI(searchQuery: string): Promise
       });
 
       for await (const partialObject of partialObjectStream) {
-        const { success, data } = MovieRecommendationsSchema.safeParse(partialObject);
+        console.log("partialObject", partialObject);
 
-        if (success && data) {
-          if (data.length > 0) {
-            uiStream.update(
-              <div className="space-y-8 py-8">
-                <h2 className="text-4xl font-semibold">Recommended Movies</h2>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {data.map((movie: MovieRecommendation, index: number) => (
-                    <MovieCard key={index} movie={movie} />
-                  ))}
-                </div>
+        const movieRecommendations: MovieRecommendation[] = partialObject
+          .map((movie) => {
+            const { success, data } = MovieRecommendationSchema.safeParse(movie);
+            if (success) {
+              return data;
+            }
+            return null;
+          })
+          .filter((movie) => movie !== null);
+
+        console.log("movieRecommendations", movieRecommendations);
+
+        if (movieRecommendations.length > 0) {
+          uiStream.update(
+            <div className="space-y-8 py-8">
+              <h2 className="text-4xl font-semibold">Recommended Movies</h2>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {movieRecommendations.map((movie: MovieRecommendation, index: number) => (
+                  <MovieCard key={index} movie={movie} />
+                ))}
               </div>
-            );
-          }
+            </div>
+          );
         }
       }
 
