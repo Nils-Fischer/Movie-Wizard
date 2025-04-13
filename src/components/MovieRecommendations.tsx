@@ -2,11 +2,16 @@
 
 import { getMovieMetadata } from "@/app/actions";
 import { MovieCard } from "./MovieCard";
-import { MovieRecommendation, MovieRecommendationSchema, MovieRecommendationsSchema } from "@/lib/movieTypes";
+import {
+  MovieRecommendation,
+  MovieRecommendationSchema,
+  MovieRecommendationsSchema,
+  OmdbMovieData,
+} from "@/lib/movieTypes";
 import { createStreamableUI } from "ai/rsc";
 import { geminiModel } from "@/lib/gemini";
 import { streamObject } from "ai";
-import React from "react";
+import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
 export async function streamMovieRecommendationsUI(searchQuery: string): Promise<React.ReactNode> {
@@ -19,13 +24,9 @@ export async function streamMovieRecommendationsUI(searchQuery: string): Promise
     );
   }
 
-  const uiStream = createStreamableUI();
+  const uiStream = createStreamableUI(<Loader2 className="h-10 w-10 animate-spin" />);
 
-  uiStream.update(
-    <div>
-      <Loader2 className="h-10 w-10 animate-spin" />
-    </div>
-  );
+  let movieRecommendations: Set<string> = new Set();
 
   (async () => {
     try {
@@ -51,30 +52,17 @@ export async function streamMovieRecommendationsUI(searchQuery: string): Promise
       for await (const partialObject of partialObjectStream) {
         console.log("partialObject", partialObject);
 
-        const movieRecommendations: MovieRecommendation[] = partialObject
-          .map((movie) => {
-            const { success, data } = MovieRecommendationSchema.safeParse(movie);
-            if (success) {
-              return data;
+        partialObject.forEach((movie) => {
+          const { success, data } = MovieRecommendationSchema.safeParse(movie);
+          if (success && !movieRecommendations.has(data.title)) {
+            movieRecommendations.add(data.title);
+            if (movieRecommendations.size === 1) {
+              uiStream.update(<MovieCard movie={data} />);
+            } else {
+              uiStream.append(<MovieCard movie={data} />);
             }
-            return null;
-          })
-          .filter((movie) => movie !== null);
-
-        console.log("movieRecommendations", movieRecommendations);
-
-        if (movieRecommendations.length > 0) {
-          uiStream.update(
-            <div className="space-y-8 py-8">
-              <h2 className="text-4xl font-semibold">Recommended Movies</h2>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {movieRecommendations.map((movie: MovieRecommendation, index: number) => (
-                  <MovieCard key={index} movie={movie} />
-                ))}
-              </div>
-            </div>
-          );
-        }
+          }
+        });
       }
 
       uiStream.done();
@@ -86,7 +74,6 @@ export async function streamMovieRecommendationsUI(searchQuery: string): Promise
 
   return uiStream.value;
 }
-
 export async function MovieRecommendationWithMetadata({
   movie,
 }: {

@@ -49,7 +49,12 @@ export default function Home() {
         </div>
       </div>
       {recommendations !== null ? (
-        <ScrollToComponent>{recommendations}</ScrollToComponent>
+        <ScrollToComponent>
+          <div className="space-y-8 py-8">
+            <h2 className="text-4xl font-semibold">Recommended Movies</h2>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">{recommendations}</div>
+          </div>
+        </ScrollToComponent>
       ) : (
         <div className="py-12 text-center" />
       )}
