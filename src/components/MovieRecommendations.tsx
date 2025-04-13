@@ -2,18 +2,14 @@
 
 import { getMovieMetadata } from "@/app/actions";
 import { MovieCard } from "./MovieCard";
-import {
-  MovieRecommendation,
-  MovieRecommendationSchema,
-  MovieRecommendationsSchema,
-  OmdbMovieData,
-} from "@/lib/movieTypes";
+import { MovieRecommendation, MovieRecommendationSchema, MovieRecommendationsSchema } from "@/lib/movieTypes";
 import { createStreamableUI } from "ai/rsc";
 import { geminiModel } from "@/lib/gemini";
 import { streamObject } from "ai";
 import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
+// Back to server component
 export async function streamMovieRecommendationsUI(searchQuery: string): Promise<React.ReactNode> {
   console.log("searchQuery", searchQuery);
   if (!searchQuery || searchQuery.trim() === "") {
@@ -26,7 +22,7 @@ export async function streamMovieRecommendationsUI(searchQuery: string): Promise
 
   const uiStream = createStreamableUI(<Loader2 className="h-10 w-10 animate-spin" />);
 
-  let movieRecommendations: Set<string> = new Set();
+  const movieRecommendations: Set<string> = new Set();
 
   (async () => {
     try {
@@ -52,17 +48,25 @@ export async function streamMovieRecommendationsUI(searchQuery: string): Promise
       for await (const partialObject of partialObjectStream) {
         console.log("partialObject", partialObject);
 
-        partialObject.forEach((movie) => {
+        for (const movie of partialObject) {
           const { success, data } = MovieRecommendationSchema.safeParse(movie);
           if (success && !movieRecommendations.has(data.title)) {
             movieRecommendations.add(data.title);
             if (movieRecommendations.size === 1) {
-              uiStream.update(<MovieCard movie={data} />);
+              uiStream.update(
+                <Suspense key={data.title} fallback={<MovieCard movie={data} />}>
+                  <MovieRecommendationWithMetadata movie={data} />
+                </Suspense>
+              );
             } else {
-              uiStream.append(<MovieCard movie={data} />);
+              uiStream.append(
+                <Suspense key={data.title} fallback={<MovieCard movie={data} />}>
+                  <MovieRecommendationWithMetadata movie={data} />
+                </Suspense>
+              );
             }
           }
-        });
+        }
       }
 
       uiStream.done();
@@ -74,12 +78,12 @@ export async function streamMovieRecommendationsUI(searchQuery: string): Promise
 
   return uiStream.value;
 }
+
 export async function MovieRecommendationWithMetadata({
   movie,
 }: {
   movie: MovieRecommendation;
 }): Promise<React.ReactNode> {
-  "use server";
   const metadata = await getMovieMetadata(movie.title, movie.year.toString());
   return <MovieCard movie={movie} metadata={metadata} />;
 }
