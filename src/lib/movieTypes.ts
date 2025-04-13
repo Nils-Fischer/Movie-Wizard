@@ -29,9 +29,9 @@ export interface OmdbMovieData {
   Error?: string;
 }
 
-const MovieRecommendationSchema = z.object({
+export const MovieRecommendationSchema = z.object({
   title: z.string(),
-  year: z.string(),
+  year: z.number().min(1800).max(new Date().getFullYear()),
   genre: z.string(),
   description: z.string(),
 });
