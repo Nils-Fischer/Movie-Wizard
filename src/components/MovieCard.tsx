@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function MovieCard({ movie }: { movie: MovieRecommendationWithMetadata }) {
   return (
@@ -26,17 +27,31 @@ export function MovieCard({ movie }: { movie: MovieRecommendationWithMetadata })
       </div>
 
       <CardHeader className="-mb-4 flex items-start justify-between">
-        <h3 className="text-xl font-semibold">{movie.title}</h3>
+        {movie.title ? <h3 className="text-xl font-semibold">{movie.title}</h3> : <Skeleton className="h-6 w-3/4" />}
       </CardHeader>
 
       <CardContent className="space-y-3">
         <div className="flex items-start justify-start gap-1">
-          <Badge variant="outline">{movie.year}</Badge>
-          <Badge variant="default" className="text-xs">
-            {movie.genre}
-          </Badge>
+          {movie.year ? <Badge variant="outline">{movie.year}</Badge> : <Skeleton className="h-5.5 w-11" />}
+          {movie.genre ? (
+            <Badge variant="default" className="text-xs">
+              {movie.genre}
+            </Badge>
+          ) : (
+            <Skeleton className="h-5 w-20" />
+          )}
         </div>
-        <p className="text-muted-foreground text-sm">{movie.description}</p>
+        {movie.description ? (
+          <p className="text-muted-foreground text-sm">{movie.description}</p>
+        ) : (
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-4/6" />
+            <Skeleton className="h-3 w-5/6" />
+            <Skeleton className="h-3 w-6/6" />
+            <Skeleton className="h-3 w-3/6" />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
