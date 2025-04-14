@@ -3,13 +3,13 @@
 import { Input } from "@/components/ui/input";
 import { FilmIcon, Search } from "lucide-react";
 import { ScrollToComponent } from "@/components/ScrollToComponent";
-import { Suspense, useState } from "react";
-import { streamMovieRecommendations } from "@/components/MovieRecommendations";
-import React from "react";
+import { useState } from "react";
+import { streamMovieRecommendations } from "@/app/actions";
 import { useSearchParams } from "next/navigation";
 import { readStreamableValue } from "ai/rsc";
 import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import { MovieCard } from "@/components/MovieCard";
+import React from "react";
 
 export default function Home() {
   const searchParams = useSearchParams();
