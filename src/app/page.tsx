@@ -45,7 +45,6 @@ export default function Home() {
               const { value } = await streamMovieRecommendations(inputValue);
 
               for await (const movies of readStreamableValue(value)) {
-                console.log(movies);
                 setRecommendations(movies ?? null);
               }
             }}
@@ -61,8 +60,8 @@ export default function Home() {
           <div className="space-y-8 py-8">
             <h2 className="text-4xl font-semibold">Recommended Movies</h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {recommendations.map((recommendation, index) => {
-                return <MovieCard key={index} movie={recommendation} />;
+              {recommendations.map((recommendation) => {
+                return <MovieCard key={`${recommendation.title}-${recommendation.year}`} movie={recommendation} />;
               })}
             </div>
           </div>

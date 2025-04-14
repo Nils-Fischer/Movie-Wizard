@@ -40,7 +40,6 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
 
     for await (const partialObject of partialObjectStream) {
       const movies = partialObject as MovieRecommendation[];
-      console.log(recommendations);
 
       const newMovies = movies.filter(
         (movie) => MovieRecommendationSchema.safeParse(movie).success && !recommendations.has(movie.title)
