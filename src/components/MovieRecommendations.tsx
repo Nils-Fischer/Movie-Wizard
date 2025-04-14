@@ -1,32 +1,20 @@
 "use server";
 
 import { getMovieMetadata } from "@/app/actions";
-import { MovieCard } from "./MovieCard";
-import { MovieRecommendation, MovieRecommendationSchema, MovieRecommendationsSchema } from "@/lib/movieTypes";
-import { createStreamableUI } from "ai/rsc";
+import {
+  MovieRecommendation,
+  MovieRecommendationSchema,
+  MovieRecommendationsSchema,
+  OmdbMovieData,
+} from "@/lib/movieTypes";
+import { createStreamableValue } from "ai/rsc";
 import { geminiModel } from "@/lib/gemini";
 import { streamObject } from "ai";
-import React, { Suspense } from "react";
-import { Loader2 } from "lucide-react";
 
-// Back to server component
-export async function streamMovieRecommendationsUI(searchQuery: string): Promise<React.ReactNode> {
-  console.log("searchQuery", searchQuery);
-  if (!searchQuery || searchQuery.trim() === "") {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-muted-foreground text-lg">Enter a search query to get movie recommendations</p>
-      </div>
-    );
-  }
+export const streamMovieRecommendations = async (searchQuery: string) => {
+  const streamableStatus = createStreamableValue<MovieRecommendation[]>([]);
 
-  const uiStream = createStreamableUI(<Loader2 className="h-10 w-10 animate-spin" />);
-
-  const movieRecommendations: Set<string> = new Set();
-
-  (async () => {
-    try {
-      const systemPrompt = `
+  const systemPrompt = `
           You are a knowledgeable movie recommender. Based on the user's query, 
           recommend exactly 9 movies that match their preferences. 
           Format your answer as a JSON array with objects containing:
@@ -38,52 +26,58 @@ export async function streamMovieRecommendationsUI(searchQuery: string): Promise
           Only respond with the JSON array, nothing else.
         `;
 
-      const { partialObjectStream } = await streamObject({
-        model: geminiModel,
-        system: systemPrompt,
-        prompt: `User query: ${searchQuery}`,
-        schema: MovieRecommendationsSchema,
+  (async () => {
+    const { partialObjectStream } = await streamObject({
+      model: geminiModel,
+      system: systemPrompt,
+      prompt: `User query: ${searchQuery}`,
+      schema: MovieRecommendationsSchema,
+    });
+
+    let recommendations: Map<string, { movie: MovieRecommendation; metadata: OmdbMovieData | undefined | "error" }> =
+      new Map();
+    const metadataPromises: Promise<void>[] = [];
+
+    for await (const partialObject of partialObjectStream) {
+      const movies = partialObject as MovieRecommendation[];
+      console.log(recommendations);
+
+      const newMovies = movies.filter(
+        (movie) => MovieRecommendationSchema.safeParse(movie).success && !recommendations.has(movie.title)
+      );
+
+      newMovies.forEach((movie) => {
+        recommendations.set(movie.title, { movie, metadata: undefined });
       });
 
-      for await (const partialObject of partialObjectStream) {
-        console.log("partialObject", partialObject);
+      const moviesWithMetadata = movies.map((movie) => ({
+        ...movie,
+        metadata: recommendations.get(movie.title)?.metadata,
+      }));
+      streamableStatus.update(moviesWithMetadata);
 
-        for (const movie of partialObject) {
-          const { success, data } = MovieRecommendationSchema.safeParse(movie);
-          if (success && !movieRecommendations.has(data.title)) {
-            movieRecommendations.add(data.title);
-            if (movieRecommendations.size === 1) {
-              uiStream.update(
-                <Suspense key={data.title} fallback={<MovieCard movie={data} />}>
-                  <MovieRecommendationWithMetadata movie={data} />
-                </Suspense>
-              );
-            } else {
-              uiStream.append(
-                <Suspense key={data.title} fallback={<MovieCard movie={data} />}>
-                  <MovieRecommendationWithMetadata movie={data} />
-                </Suspense>
-              );
-            }
-          }
-        }
-      }
-
-      uiStream.done();
-    } catch (error) {
-      console.error("Error streaming movie recommendations UI:", error);
-      uiStream.error(<div>Error loading recommendations.</div>);
+      newMovies.forEach((movie) => {
+        const promise = (async () => {
+          console.log(`Fetching metadata for: ${movie.title}`);
+          const metadata = await getMovieMetadata(movie.title, movie.year.toString());
+          recommendations.set(movie.title, { movie, metadata: metadata ?? "error" });
+          console.log(`Metadata fetched for: ${movie.title}`);
+        })();
+        metadataPromises.push(promise);
+      });
     }
+
+    // Wait for all metadata fetches to complete
+    await Promise.all(metadataPromises);
+
+    const finalRecommendations = Array.from(recommendations.values()).map(({ movie, metadata }) => {
+      return {
+        ...movie,
+        metadata,
+      };
+    });
+    streamableStatus.done(finalRecommendations);
   })();
 
-  return uiStream.value;
-}
-
-export async function MovieRecommendationWithMetadata({
-  movie,
-}: {
-  movie: MovieRecommendation;
-}): Promise<React.ReactNode> {
-  const metadata = await getMovieMetadata(movie.title, movie.year.toString());
-  return <MovieCard movie={movie} metadata={metadata} />;
-}
+  return { value: streamableStatus.value };
+};

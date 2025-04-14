@@ -1,23 +1,23 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OmdbMovieData, MovieRecommendation } from "@/lib/movieTypes";
+import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import { Loader2 } from "lucide-react";
 
-export function MovieCard({ movie, metadata }: { movie: MovieRecommendation; metadata?: OmdbMovieData | null }) {
+export function MovieCard({ movie }: { movie: MovieRecommendationWithMetadata }) {
   return (
     <Card className="overflow-hidden pt-0 transition-shadow hover:shadow-lg">
       <div className="bg-muted relative h-100 w-full p-4">
         <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
-          {metadata?.Poster ? (
+          {movie.metadata?.Poster ? (
             <img
-              src={metadata.Poster}
+              src={movie.metadata.Poster}
               alt={movie.title}
               width={500}
               height={750}
               className="h-full w-full object-cover"
               loading="lazy"
             />
-          ) : metadata === null ? (
+          ) : movie.metadata === null ? (
             <div className="text-sm">No poster available</div>
           ) : (
             <Loader2 className="h-8 w-8 animate-spin" />

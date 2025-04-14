@@ -3,17 +3,20 @@
 import { Input } from "@/components/ui/input";
 import { FilmIcon, Search } from "lucide-react";
 import { ScrollToComponent } from "@/components/ScrollToComponent";
-import { useState } from "react";
-import { streamMovieRecommendationsUI } from "@/components/MovieRecommendations";
+import { Suspense, useState } from "react";
+import { streamMovieRecommendations } from "@/components/MovieRecommendations";
 import React from "react";
 import { useSearchParams } from "next/navigation";
+import { readStreamableValue } from "ai/rsc";
+import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
+import { MovieCard } from "@/components/MovieCard";
 
 export default function Home() {
   const searchParams = useSearchParams();
   const initialSearchQuery = searchParams.get("query") || "";
   const [inputValue, setInputValue] = useState(initialSearchQuery);
 
-  const [recommendations, setRecommendations] = useState<null | React.ReactNode>(null);
+  const [recommendations, setRecommendations] = useState<null | MovieRecommendationWithMetadata[]>(null);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col justify-between gap-16 p-6 sm:gap-28 md:p-12 lg:p-24">
@@ -38,8 +41,13 @@ export default function Home() {
           />
           <button
             onClick={async () => {
-              const recommendations = await streamMovieRecommendationsUI(inputValue);
-              setRecommendations(recommendations);
+              setRecommendations(null);
+              const { value } = await streamMovieRecommendations(inputValue);
+
+              for await (const movies of readStreamableValue(value)) {
+                console.log(movies);
+                setRecommendations(movies ?? null);
+              }
             }}
             className="bg-foreground hover:bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-lg font-semibold whitespace-nowrap transition-colors sm:w-auto md:px-6 md:py-4 md:text-2xl"
           >
@@ -52,7 +60,11 @@ export default function Home() {
         <ScrollToComponent>
           <div className="space-y-8 py-8">
             <h2 className="text-4xl font-semibold">Recommended Movies</h2>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">{recommendations}</div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {recommendations.map((recommendation, index) => {
+                return <MovieCard key={index} movie={recommendation} />;
+              })}
+            </div>
           </div>
         </ScrollToComponent>
       ) : (
