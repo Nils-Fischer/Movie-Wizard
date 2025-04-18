@@ -1,9 +1,7 @@
-"use server";
-
 import { z } from "zod";
 
 // TMDB Movie Search Result Schema (partial, extend as needed)
-export const TmdbMovieResultSchema = z.object({
+const TmdbMovieResultSchema = z.object({
   id: z.number(),
   title: z.string(),
   original_title: z.string(),
@@ -18,50 +16,45 @@ export const TmdbMovieResultSchema = z.object({
   original_language: z.string(),
 });
 
-export const TmdbMovieSearchResponseSchema = z.object({
+const TmdbMovieSearchResponseSchema = z.object({
   page: z.number(),
   results: z.array(TmdbMovieResultSchema),
   total_results: z.number(),
   total_pages: z.number(),
 });
 
-export type TmdbMovieResult = z.infer<typeof TmdbMovieResultSchema>;
+type TmdbMovieResult = z.infer<typeof TmdbMovieResultSchema>;
 
 /**
  * Fetches movies from TMDB by title (and optionally year).
  * Returns the first result or null if not found.
  */
-export async function searchTmdbMovie(title: string, year: string): Promise<TmdbMovieResult | null> {
+async function searchTmdbMovie(title: string, year: string): Promise<TmdbMovieResult | null> {
   const apiKey = process.env.TMDB_API_KEY;
   if (!apiKey) {
     console.error("TMDB_API_KEY is not set in environment variables.");
     return null;
   }
-  const params = new URLSearchParams({
-    api_key: apiKey,
-    query: title,
-    year: year,
-    include_adult: "true",
-    language: "en-US",
-    page: "1",
-  });
-  const apiUrl = `https://api.themoviedb.org/3/search/movie?${params.toString()}`;
+  const url = `https://api.themoviedb.org/3/search/movie?query=${title}&include_adult=false&language=en-US&page=1&year=${year}`;
+  //  const url = "https://api.themoviedb.org/3/search/movie?query=Avengers%20Endgame&include_adult=false&language=en-US&page=1&year=2019";
+
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    next: {
+      revalidate: 3600 * 24, // 1 day
+      tags: [`tmdb-movie-search-${title}-${year ?? "any"}`],
+    },
+  };
 
   try {
-    let response = await fetch(apiUrl, {
-      next: {
-        revalidate: 3600 * 24, // 1 day
-        tags: [`tmdb-movie-search-${title}-${year ?? "any"}`],
-      },
-    });
+    let response = await fetch(url, options);
     if (!response.ok) {
       console.warn(`TMDB HTTP error! status: ${response.status}. Retrying once...`);
-      response = await fetch(apiUrl, {
-        next: {
-          revalidate: 3600 * 24,
-          tags: [`tmdb-movie-search-${title}-${year ?? "any"}`],
-        },
-      });
+      response = await fetch(url, options);
       if (!response.ok) {
         console.error(`TMDB HTTP error after retry! status: ${response.status}`);
         return null;
@@ -85,7 +78,7 @@ export async function searchTmdbMovie(title: string, year: string): Promise<Tmdb
 }
 
 // TMDB TV Search Result Schema (partial, extend as needed)
-export const TmdbTvResultSchema = z.object({
+const TmdbTvResultSchema = z.object({
   id: z.number(),
   name: z.string(),
   original_name: z.string(),
@@ -100,20 +93,20 @@ export const TmdbTvResultSchema = z.object({
   original_language: z.string(),
 });
 
-export const TmdbTvSearchResponseSchema = z.object({
+const TmdbTvSearchResponseSchema = z.object({
   page: z.number(),
   results: z.array(TmdbTvResultSchema),
   total_results: z.number(),
   total_pages: z.number(),
 });
 
-export type TmdbTvResult = z.infer<typeof TmdbTvResultSchema>;
+type TmdbTvResult = z.infer<typeof TmdbTvResultSchema>;
 
 /**
  * Fetches TV shows from TMDB by title (and optionally year).
  * Returns the first result or null if not found.
  */
-export async function searchTmdbTvShow(title: string, year: string): Promise<TmdbTvResult | null> {
+async function searchTmdbTvShow(title: string, year: string): Promise<TmdbTvResult | null> {
   const apiKey = process.env.TMDB_API_KEY;
   if (!apiKey) {
     console.error("TMDB_API_KEY is not set in environment variables.");
@@ -166,24 +159,25 @@ export async function searchTmdbTvShow(title: string, year: string): Promise<Tmd
   }
 }
 
-// Unified TMDB search result type
-export interface TmdbSearchResult {
-  id: number;
-  title: string;
-  original_title: string;
-  description: string;
-  release_date: string;
-  poster_url?: string;
-  backdrop_url?: string;
-  original_language: string;
-}
+export const TmdbSearchResultSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  original_title: z.string(),
+  description: z.string(),
+  release_date: z.string(),
+  poster_url: z.string().optional(),
+  backdrop_url: z.string().optional(),
+  original_language: z.string(),
+});
+
+export type TmdbSearchResult = z.infer<typeof TmdbSearchResultSchema>;
 
 function getTmdbImageUrl(path: string | null | undefined, size?: string): string | undefined {
   return path ? `https://image.tmdb.org/t/p/${size ?? ""}${path}` : undefined;
 }
 
 // Use TMDB's w400_and_h600_bestv2 for poster images
-const POSTER_SIZE = "w400_and_h600_bestv2";
+const POSTER_SIZE = "w780";
 
 function transformMovieResult(result: TmdbMovieResult): TmdbSearchResult {
   return {
@@ -212,6 +206,8 @@ function transformTvResult(result: TmdbTvResult): TmdbSearchResult {
 }
 
 export async function searchTmdb(title: string, year: string): Promise<TmdbSearchResult | null> {
+  "use server";
+
   const movie = await searchTmdbMovie(title, year);
   if (movie) return transformMovieResult(movie);
   const tv = await searchTmdbTvShow(title, year);
