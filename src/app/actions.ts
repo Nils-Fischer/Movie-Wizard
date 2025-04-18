@@ -48,23 +48,19 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
         recommendations.set(movie.title, { movie, metadata: undefined });
       });
 
-      const moviesWithMetadata = movies.map((movie) => ({
-        ...movie,
-        metadata: recommendations.get(movie.title)?.metadata,
-      }));
+      const moviesWithMetadata = movies
+        .map((movie) => ({
+          ...movie,
+          metadata: recommendations.get(movie.title)?.metadata,
+        }))
+        .filter((movie) => movie.metadata !== "error");
       streamableStatus.update(moviesWithMetadata);
 
       newMovies.forEach((movie) => {
         const promise = (async () => {
           console.log(`Fetching metadata for: ${movie.title}`);
           const metadata = await getMovieMetadata(movie.title, movie.year.toString());
-          if (!metadata) {
-            console.error(`Error fetching metadata for: ${movie.title}`);
-            recommendations.delete(movie.title);
-          } else {
-            console.log(`Metadata fetched for: ${movie.title}`);
-            recommendations.set(movie.title, { movie, metadata });
-          }
+          recommendations.set(movie.title, { movie, metadata: metadata ?? "error" });
         })();
         metadataPromises.push(promise);
       });
@@ -73,12 +69,14 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
     // Wait for all metadata fetches to complete
     await Promise.all(metadataPromises);
 
-    const finalRecommendations = Array.from(recommendations.values()).map(({ movie, metadata }) => {
-      return {
-        ...movie,
-        metadata,
-      };
-    });
+    const finalRecommendations = Array.from(recommendations.values())
+      .filter(({ metadata }) => metadata !== "error")
+      .map(({ movie, metadata }) => {
+        return {
+          ...movie,
+          metadata,
+        };
+      });
     streamableStatus.done(finalRecommendations);
   })();
 
