@@ -83,24 +83,22 @@ export function MovieModal({ movie, isOpen, onClose }: MovieModalProps) {
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="md:col-span-1">
-            {Poster && Poster !== "N/A" ? (
-              <Image
-                unoptimized
-                src={Poster}
-                alt={`Poster for ${Title}`}
-                width={300}
-                height={450}
-                className="h-auto w-full rounded-lg object-cover shadow-md"
-                quality={75}
-                priority
-              />
-            ) : (
-              <div className="bg-muted text-muted-foreground flex h-full min-h-[450px] w-full items-center justify-center rounded-lg">
-                No Poster Available
-              </div>
-            )}
-          </div>
+          {Poster && Poster !== "N/A" ? (
+            <Image
+              unoptimized
+              src={Poster}
+              alt={`Poster for ${Title}`}
+              width={200}
+              height={300}
+              className="h-auto w-full rounded-lg object-cover shadow-md"
+              quality={90}
+              priority
+            />
+          ) : (
+            <div className="bg-muted text-muted-foreground flex h-full min-h-[450px] w-full items-center justify-center rounded-lg">
+              No Poster Available
+            </div>
+          )}
 
           <div className="space-y-6 md:col-span-2">
             <div>

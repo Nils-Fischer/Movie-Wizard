@@ -7,7 +7,7 @@ import { useState } from "react";
 import { streamMovieRecommendations } from "@/app/actions";
 import { useSearchParams } from "next/navigation";
 import { readStreamableValue } from "ai/rsc";
-import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
+import { MovieRecommendationWithMetadata, OmdbMovieData } from "@/lib/movieTypes";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieModal } from "@/components/MovieModal";
 import React from "react";
@@ -38,6 +38,14 @@ export default function Home() {
     for await (const movies of readStreamableValue(value)) {
       setRecommendations(movies ?? null);
     }
+  }
+
+  function handleMovieError(movie: MovieRecommendationWithMetadata) {
+    movie.metadata = undefined;
+    const updatedMovies: MovieRecommendationWithMetadata[] | undefined = recommendations?.map((m) =>
+      m.title === movie.title && m.year === movie.year ? { ...m, metadata: m.metadata } : m
+    );
+    setRecommendations(updatedMovies ?? null);
   }
 
   async function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -90,6 +98,7 @@ export default function Home() {
                     key={`${recommendation.title}-${recommendation.year}`}
                     movie={recommendation}
                     onClick={() => handleMovieClick(recommendation)}
+                    handleError={() => handleMovieError(recommendation)}
                   />
                 );
               })}

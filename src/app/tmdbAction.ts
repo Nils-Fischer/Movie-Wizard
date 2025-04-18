@@ -1,3 +1,5 @@
+"use server";
+
 import { z } from "zod";
 
 // TMDB Movie Search Result Schema (partial, extend as needed)

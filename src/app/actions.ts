@@ -120,9 +120,9 @@ export async function getMovieMetadata(title: string, year: string): Promise<Omd
     }
 
     if (data.Poster && data.Poster !== "N/A") {
-      data.Poster = data.Poster.replace(/\._V1_.*\.jpg$/, "._V1_QL90_UY800_CR1,1,604,800.avif");
+      data.Poster = data.Poster.replace(/\._V1_.*\.jpg$/, "._V1_QL90_UY600_CR1,1,400,600.avif");
     } else {
-      data.Poster = "";
+      data.Poster = undefined;
     }
 
     return data;

@@ -2,15 +2,17 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function MovieCard({
   movie,
   onClick,
+  handleError,
 }: {
   movie: MovieRecommendationWithMetadata;
   onClick: (movie: MovieRecommendationWithMetadata) => void;
+  handleError: (movie: MovieRecommendationWithMetadata) => void;
 }) {
   return (
     <Card
@@ -32,11 +34,18 @@ export function MovieCard({
               className="h-full w-full object-cover"
               quality={30}
               loading="eager"
+              onError={(e) => {
+                console.error("Error loading poster for movie:", movie.title, e);
+                handleError(movie);
+              }}
             />
-          ) : movie.metadata === null ? (
-            <div className="text-sm">No poster available</div>
-          ) : (
+          ) : movie.metadata === undefined ? (
             <Loader2 className="h-8 w-8 animate-spin" />
+          ) : (
+            <div className="flex items-center gap-2 text-sm">
+              <AlertTriangle className="h-4 w-4" />
+              No poster available
+            </div>
           )}
         </div>
       </div>
