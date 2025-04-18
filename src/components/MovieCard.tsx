@@ -12,11 +12,17 @@ export function MovieCard({ movie }: { movie: MovieRecommendationWithMetadata })
         <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
           {movie.metadata?.Poster ? (
             <Image
+              unoptimized
               src={movie.metadata.Poster}
               alt={movie.title}
-              width={500}
-              height={750}
+              width={300}
+              height={450}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              placeholder="blur"
+              blurDataURL={movie.metadata.Poster}
               className="h-full w-full object-cover"
+              quality={30}
+              loading="eager"
             />
           ) : movie.metadata === null ? (
             <div className="text-sm">No poster available</div>

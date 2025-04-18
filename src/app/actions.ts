@@ -15,7 +15,7 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
 
   const systemPrompt = `
           You are a knowledgeable movie recommender. Based on the user's query, 
-          recommend exactly 9 movies that match their preferences. 
+          recommend exactly 20 movies that match their preferences. 
           Format your answer as a JSON array with objects containing:
           - title: the movie title
           - year: the release year
@@ -58,8 +58,13 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
         const promise = (async () => {
           console.log(`Fetching metadata for: ${movie.title}`);
           const metadata = await getMovieMetadata(movie.title, movie.year.toString());
-          recommendations.set(movie.title, { movie, metadata: metadata ?? "error" });
-          console.log(`Metadata fetched for: ${movie.title}`);
+          if (!metadata) {
+            console.error(`Error fetching metadata for: ${movie.title}`);
+            recommendations.delete(movie.title);
+          } else {
+            console.log(`Metadata fetched for: ${movie.title}`);
+            recommendations.set(movie.title, { movie, metadata });
+          }
         })();
         metadataPromises.push(promise);
       });
@@ -85,15 +90,24 @@ export async function getMovieMetadata(title: string, year: string): Promise<Omd
   const apiUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(title)}&y=${encodeURIComponent(year)}`;
 
   try {
-    const response = await fetch(apiUrl, {
+    let response = await fetch(apiUrl, {
       next: {
-        revalidate: 3600, // 1 hour
+        revalidate: 3600 * 24, // 1 day
         tags: [`movie-metadata-${title}-${year}`],
       },
     });
     if (!response.ok) {
-      console.error(`HTTP error! status: ${response.status}`);
-      return null;
+      console.warn(`HTTP error! status: ${response.status}. Retrying once...`);
+      response = await fetch(apiUrl, {
+        next: {
+          revalidate: 3600 * 24, // 1 day
+          tags: [`movie-metadata-${title}-${year}`],
+        },
+      });
+      if (!response.ok) {
+        console.error(`HTTP error after retry! status: ${response.status}`);
+        return null;
+      }
     }
 
     const data: OmdbMovieData = await response.json();
@@ -101,12 +115,14 @@ export async function getMovieMetadata(title: string, year: string): Promise<Omd
     if (data.Response === "False") {
       if (data.Error !== "Movie not found!") {
         console.error("OMDb API Error:", data.Error);
+      } else {
+        console.log(`Movie not found in OMDb: ${title} (${year})`);
       }
       return null;
     }
 
     if (data.Poster && data.Poster !== "N/A") {
-      data.Poster = data.Poster.replace(/\._V1_SX\d+/, "");
+      data.Poster = data.Poster.replace(/\._V1_.*\.jpg$/, "._V1_QL90_UY800_CR1,1,604,800.avif");
     } else {
       data.Poster = "";
     }
