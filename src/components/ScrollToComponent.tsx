@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 interface ScrollToComponentProps {
   children: React.ReactNode;
@@ -10,9 +10,9 @@ interface ScrollToComponentProps {
 export function ScrollToComponent({ children, scrollOnMount = true }: ScrollToComponentProps) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (scrollOnMount && ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth" });
+      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [scrollOnMount]);
 
