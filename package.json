@@ -12,7 +12,6 @@
   "dependencies": {
     "@ai-sdk/google": "^1.2.10",
     "@radix-ui/react-slot": "^1.2.0",
-    "@types/react-window": "^1.8.8",
     "ai": "^4.3.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -21,14 +20,12 @@
     "next": "15.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-use-measure": "^2.1.7",
-    "react-virtuoso": "^4.12.6",
-    "react-window": "^1.8.11",
     "tailwind-merge": "^3.2.0",
     "tw-animate-css": "^1.2.5",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "prettier": "^3.5.3",
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.3",
     "@types/node": "^22.14.1",
@@ -36,7 +33,6 @@
     "@types/react-dom": "^19.1.2",
     "eslint": "^9.24.0",
     "eslint-config-next": "15.3.0",
-    "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.1.3",
     "typescript": "^5.8.3"

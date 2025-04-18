@@ -10,7 +10,6 @@ import { readStreamableValue } from "ai/rsc";
 import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import { MovieCard } from "@/components/MovieCard";
 import React from "react";
-import { VirtuosoGrid } from "react-virtuoso";
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -71,14 +70,11 @@ export default function Home() {
         <ScrollToComponent key={recommendations ? "results" : "no-results"}>
           <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-semibold">Recommended Movies</h2>
-            <VirtuosoGrid
-              useWindowScroll
-              data={recommendations}
-              computeItemKey={(_: number, rec: MovieRecommendationWithMetadata) => `${rec.title}-${rec.year}`}
-              listClassName="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-              overscan={12}
-              itemContent={(_: number, rec: MovieRecommendationWithMetadata) => <MovieCard movie={rec} />}
-            />
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {recommendations.map((recommendation) => {
+                return <MovieCard key={`${recommendation.title}-${recommendation.year}`} movie={recommendation} />;
+              })}
+            </div>
           </div>
         </ScrollToComponent>
       ) : (
