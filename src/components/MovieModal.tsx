@@ -1,13 +1,6 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
+import { MovieRecommendationWithMetadata, OmdbMovieData } from "@/lib/movieTypes";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -21,8 +14,8 @@ import {
   DollarSignIcon,
   BuildingIcon,
   LinkIcon,
-  PercentIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 interface MovieModalProps {
   movie: MovieRecommendationWithMetadata | null;
@@ -145,11 +138,31 @@ export function MovieModal({ movie, isOpen, onClose }: MovieModalProps) {
             <div>
               <h3 className="mb-3 text-xl font-semibold">Ratings</h3>
               <div className="flex flex-wrap items-center gap-4">
-                {imdbRating && imdbRating !== "N/A" && <RatingBadge source="IMDb" value={imdbRating} icon={StarIcon} />}
-                {ratingSources["Rotten Tomatoes"] && (
-                  <RatingBadge source="Rotten Tomatoes" value={ratingSources["Rotten Tomatoes"]} icon={PercentIcon} />
+                {imdbRating && imdbRating !== "N/A" && (
+                  <RatingBadge
+                    source="IMDb"
+                    value={imdbRating}
+                    icon={StarIcon}
+                    svgSrc="/imdb.svg"
+                    link={getLink(movie.metadata, "IMDb")}
+                  />
                 )}
-                {Metascore && Metascore !== "N/A" && <RatingBadge source="Metascore" value={`${Metascore}/100`} />}
+                {ratingSources["Rotten Tomatoes"] && (
+                  <RatingBadge
+                    source="Rotten Tomatoes"
+                    value={ratingSources["Rotten Tomatoes"]}
+                    svgSrc="/rottentomatoes.svg"
+                    link={getLink(movie.metadata, "Rotten Tomatoes")}
+                  />
+                )}
+                {Metascore && Metascore !== "N/A" && (
+                  <RatingBadge
+                    source="Metascore"
+                    value={`${Metascore}/100`}
+                    svgSrc="/metascore.svg"
+                    link={getLink(movie.metadata, "Metascore")}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -200,12 +213,58 @@ function DetailItem({
   );
 }
 
-function RatingBadge({ source, value, icon: Icon }: { source: string; value: string; icon?: React.ElementType }) {
-  return (
-    <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-sm">
-      {Icon && <Icon className={`h-4 w-4 ${source === "IMDb" ? "text-yellow-500" : "text-muted-foreground"}`} />}
-      <span className="font-semibold">{source}:</span>
-      <span>{value}</span>
+// Updated RatingBadge Props
+interface RatingBadgeProps {
+  source: string;
+  value: string;
+  icon?: React.ElementType; // For Lucide icons (like IMDb)
+  svgSrc?: string; // For SVG images (like RT, Metascore)
+  link?: string;
+}
+
+// Updated RatingBadge Implementation
+function RatingBadge({ source, value, icon: Icon, svgSrc, link }: RatingBadgeProps) {
+  const badgeContent = (
+    <Badge variant="secondary" className="flex items-center gap-1.5 px-2.5 py-1 text-sm font-medium">
+      {svgSrc ? (
+        <Image src={svgSrc} alt={`${source} logo`} width={24} height={24} className="h-6 w-6" />
+      ) : Icon ? (
+        <Icon
+          className={`h-6 w-6 flex-shrink-0 ${source === "IMDb" ? "text-yellow-500" : "text-muted-foreground"}`}
+          aria-hidden="true"
+        />
+      ) : null}
+      <span className="ml-0.5">{value}</span>
     </Badge>
   );
+  if (link) {
+    return (
+      <Link
+        href={link.startsWith("http") ? link : `https://${link}`}
+        passHref
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block cursor-pointer transition-transform hover:scale-105"
+      >
+        {badgeContent}
+      </Link>
+    );
+  }
+  return badgeContent;
+}
+
+function getLink(metadata: OmdbMovieData, source: "Rotten Tomatoes" | "Metascore" | "IMDb") {
+  if (source === "Rotten Tomatoes") {
+    const prefix = metadata.Type === "movie" ? "m" : "tv";
+    const title = metadata.Title.replace(/ /g, "_").toLowerCase();
+    return `https://www.rottentomatoes.com/${prefix}/${title}`;
+  }
+  if (source === "Metascore") {
+    const prefix = metadata.Type === "movie" ? "movie" : "tv";
+    const title = metadata.Title.replace(/ /g, "-").toLowerCase();
+    return `https://www.metacritic.com/${prefix}/${title}`;
+  }
+  if (source === "IMDb") {
+    return `https://www.imdb.com/title/${metadata.imdbID}`;
+  }
 }
