@@ -9,6 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { readStreamableValue } from "ai/rsc";
 import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import { MovieCard } from "@/components/MovieCard";
+import { MovieModal } from "@/components/MovieModal";
 import React from "react";
 
 export default function Home() {
@@ -17,6 +18,18 @@ export default function Home() {
   const [inputValue, setInputValue] = useState(initialSearchQuery);
 
   const [recommendations, setRecommendations] = useState<null | MovieRecommendationWithMetadata[]>(null);
+  const [selectedMovie, setSelectedMovie] = useState<MovieRecommendationWithMetadata | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  function handleMovieClick(movie: MovieRecommendationWithMetadata) {
+    setSelectedMovie(movie);
+    setIsModalOpen(true);
+  }
+
+  function handleCloseModal() {
+    setIsModalOpen(false);
+    setSelectedMovie(null);
+  }
 
   async function handleSearch() {
     setRecommendations(null);
@@ -72,7 +85,13 @@ export default function Home() {
             <h2 className="text-4xl font-semibold">Recommended Movies</h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {recommendations.map((recommendation) => {
-                return <MovieCard key={`${recommendation.title}-${recommendation.year}`} movie={recommendation} />;
+                return (
+                  <MovieCard
+                    key={`${recommendation.title}-${recommendation.year}`}
+                    movie={recommendation}
+                    onClick={() => handleMovieClick(recommendation)}
+                  />
+                );
               })}
             </div>
           </div>
@@ -80,6 +99,7 @@ export default function Home() {
       ) : (
         <div className="py-12 text-center" />
       )}
+      <MovieModal movie={selectedMovie} isOpen={isModalOpen} onClose={handleCloseModal} />
     </main>
   );
 }

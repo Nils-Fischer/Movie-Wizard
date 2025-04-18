@@ -14,7 +14,7 @@ export const OmdbMovieDataSchema = z.object({
   Language: z.string(),
   Country: z.string(),
   Awards: z.string(),
-  Poster: z.string(), // URL
+  Poster: z.string(),
   Ratings: z.array(z.object({ Source: z.string(), Value: z.string() })),
   Metascore: z.string(),
   imdbRating: z.string(),

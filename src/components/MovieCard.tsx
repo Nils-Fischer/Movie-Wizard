@@ -5,9 +5,18 @@ import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function MovieCard({ movie }: { movie: MovieRecommendationWithMetadata }) {
+export function MovieCard({
+  movie,
+  onClick,
+}: {
+  movie: MovieRecommendationWithMetadata;
+  onClick: (movie: MovieRecommendationWithMetadata) => void;
+}) {
   return (
-    <Card className="overflow-hidden pt-0 transition-shadow hover:shadow-lg">
+    <Card
+      onClick={() => onClick(movie)}
+      className="cursor-pointer overflow-hidden pt-0 transition-shadow hover:shadow-lg"
+    >
       <div className="bg-muted relative h-108 w-full p-4">
         <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
           {movie.metadata?.Poster ? (
