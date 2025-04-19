@@ -12,6 +12,9 @@ import { streamObject } from "ai";
 
 export const streamMovieRecommendations = async (searchQuery: string) => {
   console.log("streamMovieRecommendations called with query:", searchQuery);
+
+  console.log("Environment check - OMDB_API_KEY present?", Boolean(process.env.OMDB_API_KEY));
+
   const streamableStatus = createStreamableValue<MovieRecommendation[]>([]);
 
   const systemPrompt = `
@@ -97,6 +100,7 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
 export async function getMovieMetadata(title: string, year: string): Promise<OmdbMovieData | null> {
   const apiKey = process.env.OMDB_API_KEY;
   const apiUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(title)}&y=${encodeURIComponent(year)}`;
+  console.log("getMovieMetadata called for", title, year, { OMDB_API_KEY_present: Boolean(apiKey), apiUrl });
 
   try {
     let response = await fetch(apiUrl, {

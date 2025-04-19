@@ -18,6 +18,7 @@ export const dynamic = "force-dynamic";
 export default function Home() {
   const searchParams = useSearchParams();
   const initialSearchQuery = searchParams.get("query") || "";
+
   const [inputValue, setInputValue] = useState(initialSearchQuery);
 
   const [recommendations, setRecommendations] = useState<null | MovieRecommendationWithMetadata[]>(null);
