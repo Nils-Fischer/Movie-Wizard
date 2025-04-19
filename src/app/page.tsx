@@ -12,6 +12,8 @@ import { MovieCard } from "@/components/MovieCard";
 import { MovieModal } from "@/components/MovieModal";
 import React from "react";
 
+export const maxDuration = 60;
+
 export default function Home() {
   const searchParams = useSearchParams();
   const initialSearchQuery = searchParams.get("query") || "";
@@ -35,9 +37,9 @@ export default function Home() {
     console.log("Searching for movies...", inputValue);
     setRecommendations(null);
     const { value } = await streamMovieRecommendations(inputValue);
-    console.log("Stream started", value);
 
     for await (const movies of readStreamableValue(value)) {
+      console.log("Movies found", movies);
       setRecommendations(movies ?? null);
     }
   }
