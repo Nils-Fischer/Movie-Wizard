@@ -7,7 +7,7 @@ import { useState } from "react";
 import { streamMovieRecommendations } from "@/app/actions";
 import { useSearchParams } from "next/navigation";
 import { readStreamableValue } from "ai/rsc";
-import { MovieRecommendationWithMetadata, OmdbMovieData } from "@/lib/movieTypes";
+import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieModal } from "@/components/MovieModal";
 import React from "react";
