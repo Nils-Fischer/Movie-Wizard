@@ -11,6 +11,7 @@ import { geminiModel } from "@/lib/gemini";
 import { streamObject } from "ai";
 
 export const streamMovieRecommendations = async (searchQuery: string) => {
+  console.log("streamMovieRecommendations called with query:", searchQuery);
   const streamableStatus = createStreamableValue<MovieRecommendation[]>([]);
 
   const systemPrompt = `
@@ -26,58 +27,68 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
         `;
 
   (async () => {
-    const { partialObjectStream } = await streamObject({
-      model: geminiModel,
-      system: systemPrompt,
-      prompt: `User query: ${searchQuery}`,
-      schema: MovieRecommendationsSchema,
-    });
-
-    const recommendations: Map<string, { movie: MovieRecommendation; metadata: OmdbMovieData | undefined | "error" }> =
-      new Map();
-    const metadataPromises: Promise<void>[] = [];
-
-    for await (const partialObject of partialObjectStream) {
-      const movies = partialObject as MovieRecommendation[];
-
-      const newMovies = movies.filter(
-        (movie) => MovieRecommendationSchema.safeParse(movie).success && !recommendations.has(movie.title)
-      );
-
-      newMovies.forEach((movie) => {
-        recommendations.set(movie.title, { movie, metadata: undefined });
+    try {
+      const { partialObjectStream } = await streamObject({
+        model: geminiModel,
+        system: systemPrompt,
+        prompt: `User query: ${searchQuery}`,
+        schema: MovieRecommendationsSchema,
       });
+      console.log("streamObject started");
 
-      const moviesWithMetadata = movies
-        .map((movie) => ({
-          ...movie,
-          metadata: recommendations.get(movie.title)?.metadata,
-        }))
-        .filter((movie) => movie.metadata !== "error");
-      streamableStatus.update(moviesWithMetadata);
+      const recommendations: Map<
+        string,
+        { movie: MovieRecommendation; metadata: OmdbMovieData | undefined | "error" }
+      > = new Map();
+      const metadataPromises: Promise<void>[] = [];
 
-      newMovies.forEach((movie) => {
-        const promise = (async () => {
-          console.log(`Fetching metadata for: ${movie.title}`);
-          const metadata = await getMovieMetadata(movie.title, movie.year.toString());
-          recommendations.set(movie.title, { movie, metadata: metadata ?? "error" });
-        })();
-        metadataPromises.push(promise);
-      });
+      for await (const partialObject of partialObjectStream) {
+        console.log("Received partialObject from streamObject");
+        const movies = partialObject as MovieRecommendation[];
+
+        const newMovies = movies.filter(
+          (movie) => MovieRecommendationSchema.safeParse(movie).success && !recommendations.has(movie.title)
+        );
+
+        newMovies.forEach((movie) => {
+          recommendations.set(movie.title, { movie, metadata: undefined });
+        });
+
+        const moviesWithMetadata = movies
+          .map((movie) => ({
+            ...movie,
+            metadata: recommendations.get(movie.title)?.metadata,
+          }))
+          .filter((movie) => movie.metadata !== "error");
+        streamableStatus.update(moviesWithMetadata);
+
+        newMovies.forEach((movie) => {
+          const promise = (async () => {
+            console.log(`Fetching metadata for: ${movie.title}`);
+            const metadata = await getMovieMetadata(movie.title, movie.year.toString());
+            recommendations.set(movie.title, { movie, metadata: metadata ?? "error" });
+          })();
+          metadataPromises.push(promise);
+        });
+      }
+
+      // Wait for all metadata fetches to complete
+      await Promise.all(metadataPromises);
+      console.log("All metadata fetches complete");
+
+      const finalRecommendations = Array.from(recommendations.values())
+        .filter(({ metadata }) => metadata !== "error")
+        .map(({ movie, metadata }) => {
+          return {
+            ...movie,
+            metadata,
+          };
+        });
+      streamableStatus.done(finalRecommendations);
+      console.log("streamMovieRecommendations done");
+    } catch (error) {
+      console.error("Error in streamMovieRecommendations:", error);
     }
-
-    // Wait for all metadata fetches to complete
-    await Promise.all(metadataPromises);
-
-    const finalRecommendations = Array.from(recommendations.values())
-      .filter(({ metadata }) => metadata !== "error")
-      .map(({ movie, metadata }) => {
-        return {
-          ...movie,
-          metadata,
-        };
-      });
-    streamableStatus.done(finalRecommendations);
   })();
 
   return { value: streamableStatus.value };
