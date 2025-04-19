@@ -32,8 +32,10 @@ export default function Home() {
   }
 
   async function handleSearch() {
+    console.log("Searching for movies...", inputValue);
     setRecommendations(null);
     const { value } = await streamMovieRecommendations(inputValue);
+    console.log("Stream started", value);
 
     for await (const movies of readStreamableValue(value)) {
       setRecommendations(movies ?? null);
