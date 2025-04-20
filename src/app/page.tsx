@@ -11,6 +11,8 @@ import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieModal } from "@/components/MovieModal";
 import React from "react";
+import { Marquee } from "@/components/magicui/marquee";
+import { shuffledPromptExamples } from "@/lib/promptExamples";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -73,7 +75,18 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mt-8 flex flex-col space-y-8 md:mt-0">
+        <div className="mt-8 flex flex-col gap-2 md:mt-0">
+          <Marquee pauseOnHover className="[--duration:1000s]">
+            {shuffledPromptExamples.map((prompt) => (
+              <div
+                key={prompt}
+                onClick={() => setInputValue(prompt)}
+                className="bg-card text-card-foreground hover:bg-primary/10 hover:border-primary mx-2 cursor-pointer rounded-lg border p-3 text-sm font-medium"
+              >
+                {prompt}
+              </div>
+            ))}
+          </Marquee>
           <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
             <Input
               name="query"
