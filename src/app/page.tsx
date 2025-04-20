@@ -64,7 +64,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col">
-      <div className="flex max-w-7xl flex-col justify-between gap-16 sm:gap-28 md:p-12 lg:p-24 xl:m-28">
+      <div className="flex max-w-7xl flex-col justify-between gap-16 p-4 py-8 sm:gap-28 sm:p-8 md:p-12 lg:p-24 xl:m-28">
         <div className="items-center space-y-8 text-center">
           <div className="flex flex-row items-center justify-center gap-3">
             <FilmIcon className="text-primary h-10 w-10 sm:h-12 sm:w-12" />
@@ -110,7 +110,7 @@ export default function Home() {
         <ScrollToComponent key={recommendations ? "results" : "no-results"}>
           <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-semibold">Recommended Movies</h2>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-3 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-6">
               {recommendations.map((recommendation) => {
                 return (
                   <MovieCard
