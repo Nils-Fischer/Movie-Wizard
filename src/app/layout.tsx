@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { Geist, Righteous } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
@@ -34,6 +35,7 @@ export default function RootLayout({
       </head>
       <body className={cn("bg-background min-h-screen font-sans antialiased", geistSans.variable, righteous.variable)}>
         <SpeedInsights />
+        <Analytics />
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
       </body>
     </html>
