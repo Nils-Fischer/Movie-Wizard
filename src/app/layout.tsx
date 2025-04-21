@@ -19,7 +19,26 @@ const righteous = Righteous({
 
 export const metadata: Metadata = {
   title: "Movie Wizard",
-  description: "Find the perfect movie for you",
+  description: "AI-curated movie recommendations.",
+  openGraph: {
+    title: "Movie Wizard",
+    description: "AI-curated movie recommendations.",
+    images: [
+      {
+        url: "https://moviewizard.me/icon.webp",
+        width: 1200,
+        height: 630,
+        alt: "Movie Wizard Open Graph Image",
+        type: "image/webp",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Movie Wizard",
+    description: "AI-curated movie recommendations.",
+    images: ["https://moviewizard.me/icon.webp"],
+  },
 };
 
 export default function RootLayout({
