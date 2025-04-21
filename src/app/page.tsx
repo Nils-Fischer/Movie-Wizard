@@ -67,8 +67,8 @@ export default function Home() {
       <div className="flex max-w-7xl flex-col justify-between gap-16 p-4 py-8 sm:gap-28 sm:p-8 md:p-12 lg:p-24 xl:m-28">
         <div className="items-center space-y-8 text-center">
           <div className="flex flex-row items-center justify-center gap-3">
-            <FilmIcon className="text-primary h-10 w-10 sm:h-12 sm:w-12" />
-            <h1 className="text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">Movie Wizard</h1>
+            <FilmIcon className="text-primary h-10 w-10 sm:h-14 sm:w-14" />
+            <h1 className="font-heading text-4xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">Movie Wizard</h1>
           </div>
           <p className="text-muted-foreground mx-auto max-w-2xl text-lg sm:text-xl md:text-2xl">
             Tell us what you&apos;re in the mood for, and we&apos;ll help you find the perfect movie to watch.
