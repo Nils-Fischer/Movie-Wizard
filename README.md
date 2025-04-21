@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Movie Wizard: AI-Powered Movie Recommendations
 
-## Getting Started
+Never spend hours scrolling for something to watch again! Movie Wizard uses AI to give you personalized movie suggestions based on your mood and preferences.
 
-First, run the development server:
+**Try it now:** [https://moviewizard.me/](https://moviewizard.me/)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**(Optional: See it in action)**
+<video controls width="720" src="./assets/demo.mp4">
+Your browser does not support the video tag.
+</video>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Intelligent AI Suggestions:** Describe what you want to watch (a genre, an actor, a vibe, etc.), and our AI, powered by Gemini 2.0 Flash, will find movies you'll love.
+- **Live Streaming Recommendations:** No waiting! Suggestions appear on your screen in real-time as the AI generates them, using the Vercel AI SDK's streaming functionality.
+- **Instant Movie Details:** We fetch and cache movie posters, summaries, and other metadata from the OMDB API the moment a potential recommendation (title and year) is streamed. This means you see relevant info immediately, even before the full list of suggestions is complete.
+- **Responsive Design:** Enjoy a seamless experience on any device.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Technology Breakdown
 
-## Learn More
+Movie Wizard is built using a modern web stack:
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Frontend:** Next.js (App Router) provides the foundation for a fast and interactive user interface built with React.
+- **AI Integration:** The Vercel AI SDK handles communication with Google's Gemini 2.0 Flash model, enabling natural language understanding and recommendation generation.
+- **Data Fetching:** The OMDB API serves as the source for rich movie metadata. Efficient caching strategies ensure quick loading of details.
