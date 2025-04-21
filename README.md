@@ -4,11 +4,6 @@ Never spend hours scrolling for something to watch again! Movie Wizard uses AI t
 
 **Try it now:** [https://moviewizard.me/](https://moviewizard.me/)
 
-**(Optional: See it in action)**
-<video controls width="720" src="./assets/demo.mp4">
-Your browser does not support the video tag.
-</video>
-
 ## Key Features
 
 - **Intelligent AI Suggestions:** Describe what you want to watch (a genre, an actor, a vibe, etc.), and our AI, powered by Gemini 2.0 Flash, will find movies you'll love.
