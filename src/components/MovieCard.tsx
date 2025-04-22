@@ -15,7 +15,7 @@ export function MovieCard({
   onClick: (movie: MovieRecommendationWithMetadata) => void;
   handleError: (movie: MovieRecommendationWithMetadata) => void;
 }) {
-  const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
+  const [imageSrc, setImageSrc] = useState<string | undefined | null>(undefined);
 
   useEffect(() => {
     if (movie.metadata?.Poster) {
@@ -38,8 +38,6 @@ export function MovieCard({
               width={180}
               height={270}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              placeholder="blur"
-              blurDataURL={imageSrc ?? movie.metadata?.Poster}
               className="h-full w-full rounded-md object-cover"
               quality={30}
               loading="eager"
@@ -50,11 +48,12 @@ export function MovieCard({
                   setImageSrc(newImageSrc);
                 } else {
                   console.error("Error loading poster for movie:", movie.title, e);
+                  setImageSrc(null);
                   handleError(movie);
                 }
               }}
             />
-          ) : movie.metadata === undefined ? (
+          ) : imageSrc === undefined ? (
             <Loader2 className="h-8 w-8 animate-spin" />
           ) : (
             <div className="flex items-center gap-2 text-sm">

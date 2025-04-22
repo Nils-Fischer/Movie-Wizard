@@ -48,7 +48,22 @@ export default function Home() {
     const { value } = await streamMovieRecommendations(inputValue);
 
     for await (const movies of readStreamableValue(value)) {
-      setRecommendations(movies ?? null);
+      if (movies) {
+        const uniqueMovies = Array.from(
+          movies
+            .reduce((map, movie) => {
+              const key = `${movie.title}-${movie.year}`;
+              if (!map.has(key)) {
+                map.set(key, movie);
+              }
+              return map;
+            }, new Map<string, MovieRecommendationWithMetadata>())
+            .values()
+        );
+        setRecommendations(uniqueMovies);
+      } else {
+        setRecommendations(null);
+      }
     }
   }
 
