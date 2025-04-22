@@ -48,7 +48,6 @@ export function MovieCard({
                   console.log("Replacing avif with jpg for movie:", movie.title);
                   const newImageSrc = imageSrc.replace("QL90_UY600_CR1,1,400,600.avif", ".jpg");
                   setImageSrc(newImageSrc);
-                  console.log("newImageSrc", newImageSrc);
                 } else {
                   console.error("Error loading poster for movie:", movie.title, e);
                   handleError(movie);

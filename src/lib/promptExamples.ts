@@ -1,4 +1,4 @@
-const promptExamples = [
+export const promptExamples = [
   "Wong Kar-wai movies",
   "Movies that feel like a rainy Sunday afternoon",
   "Visually stunning sci-fi films",
@@ -286,7 +286,7 @@ const promptExamples = [
   "Satirical takes on the media",
 ];
 
-function shuffleArray<T>(array: T[]): T[] {
+export function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -294,5 +294,3 @@ function shuffleArray<T>(array: T[]): T[] {
   }
   return shuffled;
 }
-
-export const shuffledPromptExamples = shuffleArray(promptExamples);

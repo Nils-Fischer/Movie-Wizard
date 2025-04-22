@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { FilmIcon, Search } from "lucide-react";
 import { ScrollToComponent } from "@/components/ScrollToComponent";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { streamMovieRecommendations } from "@/app/actions";
 import { useSearchParams } from "next/navigation";
 import { readStreamableValue } from "ai/rsc";
@@ -12,7 +12,7 @@ import { MovieCard } from "@/components/MovieCard";
 import { MovieModal } from "@/components/MovieModal";
 import React from "react";
 import { Marquee } from "@/components/magicui/marquee";
-import { shuffledPromptExamples } from "@/lib/promptExamples";
+import { promptExamples, shuffleArray } from "@/lib/promptExamples";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -26,6 +26,11 @@ export default function Home() {
   const [recommendations, setRecommendations] = useState<null | MovieRecommendationWithMetadata[]>(null);
   const [selectedMovie, setSelectedMovie] = useState<MovieRecommendationWithMetadata | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [prompts, setPrompts] = useState<string[]>(promptExamples);
+  useEffect(() => {
+    setPrompts(shuffleArray(promptExamples));
+  }, []);
 
   function handleMovieClick(movie: MovieRecommendationWithMetadata) {
     setSelectedMovie(movie);
@@ -76,7 +81,7 @@ export default function Home() {
 
         <div className="mt-8 flex flex-col gap-2 md:mt-0">
           <Marquee pauseOnHover className="[--duration:1000s]">
-            {shuffledPromptExamples.map((prompt) => (
+            {prompts.map((prompt) => (
               <div
                 key={prompt}
                 onClick={() => setInputValue(prompt)}
