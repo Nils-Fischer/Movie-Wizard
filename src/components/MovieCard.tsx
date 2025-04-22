@@ -4,6 +4,7 @@ import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import Image from "next/image";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
 export function MovieCard({
   movie,
@@ -14,6 +15,14 @@ export function MovieCard({
   onClick: (movie: MovieRecommendationWithMetadata) => void;
   handleError: (movie: MovieRecommendationWithMetadata) => void;
 }) {
+  const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (movie.metadata?.Poster) {
+      setImageSrc(movie.metadata.Poster);
+    }
+  }, [movie.metadata?.Poster]);
+
   return (
     <Card
       onClick={() => onClick(movie)}
@@ -24,19 +33,26 @@ export function MovieCard({
           {movie.metadata?.Poster ? (
             <Image
               unoptimized
-              src={movie.metadata.Poster}
+              src={imageSrc ?? movie.metadata?.Poster}
               alt={movie.title}
               width={180}
               height={270}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               placeholder="blur"
-              blurDataURL={movie.metadata.Poster}
+              blurDataURL={imageSrc ?? movie.metadata?.Poster}
               className="h-full w-full rounded-md object-cover"
               quality={30}
               loading="eager"
               onError={(e) => {
-                console.error("Error loading poster for movie:", movie.title, e);
-                handleError(movie);
+                if (imageSrc && imageSrc?.endsWith(".avif")) {
+                  console.log("Replacing avif with jpg for movie:", movie.title);
+                  const newImageSrc = imageSrc.replace("QL90_UY600_CR1,1,400,600.avif", ".jpg");
+                  setImageSrc(newImageSrc);
+                  console.log("newImageSrc", newImageSrc);
+                } else {
+                  console.error("Error loading poster for movie:", movie.title, e);
+                  handleError(movie);
+                }
               }}
             />
           ) : movie.metadata === undefined ? (

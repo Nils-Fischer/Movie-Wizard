@@ -43,7 +43,6 @@ export default function Home() {
     const { value } = await streamMovieRecommendations(inputValue);
 
     for await (const movies of readStreamableValue(value)) {
-      console.log("Movies found", movies);
       setRecommendations(movies ?? null);
     }
   }
