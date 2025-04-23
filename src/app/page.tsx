@@ -128,7 +128,10 @@ export default function Home() {
       {recommendations !== null && recommendations.length > 0 ? (
         <ScrollToComponent key={recommendations ? "results" : "no-results"}>
           <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-            <h2 className="text-4xl font-semibold">Recommended Movies</h2>
+            <div className="flex flex-row items-end justify-start gap-2">
+              <h3 className="text-xl font-semibold sm:text-4xl">Recommended Movies</h3>
+              <p className="text-muted-foreground text-sm italic sm:text-base md:text-lg">Click for details</p>
+            </div>
             <div className="grid grid-cols-3 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-6">
               {recommendations.map((recommendation) => {
                 return (

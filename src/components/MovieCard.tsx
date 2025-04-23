@@ -28,12 +28,14 @@ export function MovieCard({
       onClick={() => onClick(movie)}
       className="w-full max-w-xs cursor-pointer overflow-hidden pt-0 pb-0 transition-shadow hover:shadow-lg sm:max-w-sm sm:pb-4 md:max-w-md lg:max-w-lg xl:max-w-xl"
     >
-      <div className="bg-muted relative h-72 w-full p-1 sm:h-80 sm:p-2 md:h-96 md:p-3 lg:h-[28rem] lg:p-4 xl:h-108">
+      <div className="bg-muted relative h-56 w-full p-1 sm:h-80 sm:p-2 md:h-96 md:p-3 lg:h-[28rem] lg:p-4 xl:h-108">
         <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
-          {movie.metadata?.Poster ? (
+          {movie.metadata === undefined && imageSrc === undefined ? (
+            <Loader2 className="h-8 w-8 animate-spin" />
+          ) : imageSrc || movie.metadata?.Poster ? (
             <Image
               unoptimized
-              src={imageSrc ?? movie.metadata?.Poster}
+              src={imageSrc ?? movie.metadata?.Poster!}
               alt={movie.title}
               width={180}
               height={270}
@@ -53,8 +55,6 @@ export function MovieCard({
                 }
               }}
             />
-          ) : imageSrc === undefined ? (
-            <Loader2 className="h-8 w-8 animate-spin" />
           ) : (
             <div className="flex items-center gap-2 text-sm">
               <AlertTriangle className="h-4 w-4" />
@@ -64,7 +64,7 @@ export function MovieCard({
         </div>
       </div>
 
-      <CardHeader className="-mb-4 flex items-start justify-between px-2 sm:px-3 md:px-4 lg:px-6">
+      <CardHeader className="hidden items-start justify-between px-2 sm:block sm:px-3 md:px-4 lg:px-6">
         {movie.title ? (
           <h3 className="text-md font-semibold md:text-xl">{movie.title}</h3>
         ) : (
@@ -72,7 +72,7 @@ export function MovieCard({
         )}
       </CardHeader>
 
-      <CardContent className="space-y-3 px-2 pb-0 sm:px-2 md:px-3 lg:px-6">
+      <CardContent className="hidden space-y-3 px-2 pb-0 sm:block sm:px-2 md:px-3 lg:px-6">
         <div className="flex items-start justify-start gap-1">
           {movie.year ? <Badge variant="outline">{movie.year}</Badge> : <Skeleton className="h-5.5 w-11" />}
           {movie.genre ? (
