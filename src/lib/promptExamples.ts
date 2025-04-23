@@ -243,7 +243,6 @@ export const promptExamples = [
   "Satirical takes on political systems",
   "Films exploring memory and nostalgia",
   "Movies with non-professional actors",
-  "Eco-thrillers",
   "Films about unlikely mentors",
   "Movies with ambiguous protagonists",
   "Subversive fairy tales",

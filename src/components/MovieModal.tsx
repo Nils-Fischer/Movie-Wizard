@@ -67,7 +67,7 @@ export function MovieModal({ movie, isOpen, onClose }: MovieModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl">
+      <DialogContent className="max-h-160 overflow-y-auto sm:max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl">
         <DialogHeader className="mb-4 items-center justify-center pr-6">
           <DialogTitle className="text-2xl font-bold md:text-3xl lg:text-4xl">{Title}</DialogTitle>
           <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm sm:text-base">

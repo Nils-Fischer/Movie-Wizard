@@ -97,13 +97,13 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mt-8 flex flex-col gap-2 md:mt-0">
-          <Marquee pauseOnHover className="[--duration:1000s]">
+        <div className="mt-8 flex flex-col gap-2 sm:mt-0">
+          <Marquee pauseOnHover className="[--duration:750s] sm:[--duration:1000s]">
             {prompts.map((prompt) => (
               <div
                 key={prompt}
                 onClick={() => setInputValue(prompt)}
-                className="bg-card text-card-foreground hover:bg-primary/10 hover:border-primary mx-2 cursor-pointer rounded-lg border p-3 text-sm font-medium"
+                className="bg-card text-card-foreground hover:bg-primary/10 hover:border-primary mx-2 cursor-pointer rounded-lg border p-3 text-xs font-medium sm:text-sm"
               >
                 {prompt}
               </div>
