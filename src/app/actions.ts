@@ -9,6 +9,7 @@ import {
 import { createStreamableValue } from "ai/rsc";
 import { geminiModel } from "@/lib/gemini";
 import { streamObject } from "ai";
+import { QUALITY_SETTINGS } from "@/lib/movieTypes";
 
 export const streamMovieRecommendations = async (searchQuery: string) => {
   console.log("streamMovieRecommendations called with query:", searchQuery);
@@ -135,7 +136,7 @@ export async function getMovieMetadata(title: string, year: string): Promise<Omd
     }
 
     if (data.Poster && data.Poster !== "N/A") {
-      data.Poster = data.Poster.replace(/\._V1_.*\.jpg$/, "._V1_QL90_UY600_CR1,1,400,600.avif");
+      data.Poster = data.Poster.replace(/\._V1_.*\.jpg$/, `._V1_${QUALITY_SETTINGS}.avif`);
     } else {
       data.Poster = undefined;
     }

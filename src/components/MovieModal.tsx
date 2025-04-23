@@ -1,6 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { MovieRecommendationWithMetadata, OmdbMovieData } from "@/lib/movieTypes";
+import {
+  HIGH_QUALITY_SETTINGS,
+  MovieRecommendationWithMetadata,
+  OmdbMovieData,
+  QUALITY_SETTINGS,
+} from "@/lib/movieTypes";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +21,7 @@ import {
   LinkIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { ProgressiveImage } from "./ProgressiveImage";
 
 interface MovieModalProps {
   movie: MovieRecommendationWithMetadata | null;
@@ -25,6 +31,8 @@ interface MovieModalProps {
 
 export function MovieModal({ movie, isOpen, onClose }: MovieModalProps) {
   if (!movie || !movie.metadata) return null;
+
+  const poster = movie.metadata.Poster?.replace(QUALITY_SETTINGS, HIGH_QUALITY_SETTINGS);
 
   const {
     Title,
@@ -40,7 +48,6 @@ export function MovieModal({ movie, isOpen, onClose }: MovieModalProps) {
     Language,
     Country,
     Awards,
-    Poster,
     Ratings,
     Metascore,
     BoxOffice,
@@ -83,10 +90,10 @@ export function MovieModal({ movie, isOpen, onClose }: MovieModalProps) {
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {Poster && Poster !== "N/A" ? (
-            <Image
-              unoptimized
-              src={Poster}
+          {poster && poster !== "N/A" ? (
+            <ProgressiveImage
+              lowQualitySrc={movie.metadata?.Poster}
+              highQualitySrc={poster}
               alt={`Poster for ${Title}`}
               width={200}
               height={300}

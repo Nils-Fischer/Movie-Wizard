@@ -47,3 +47,7 @@ export const MovieRecommendationWithMetadataSchema = MovieRecommendationSchema.e
 });
 
 export type MovieRecommendationWithMetadata = z.infer<typeof MovieRecommendationWithMetadataSchema>;
+
+export const QUALITY_SETTINGS = "QL90_UY600_CR0,0,400,600";
+
+export const HIGH_QUALITY_SETTINGS = "QL90_UY1800_CR0,0,1200,1800";

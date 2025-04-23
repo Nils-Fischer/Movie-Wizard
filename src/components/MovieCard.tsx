@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
+import { MovieRecommendationWithMetadata, QUALITY_SETTINGS } from "@/lib/movieTypes";
 import Image from "next/image";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,14 +28,14 @@ export function MovieCard({
       onClick={() => onClick(movie)}
       className="w-full max-w-xs cursor-pointer overflow-hidden pt-0 pb-0 transition-shadow hover:shadow-lg sm:max-w-sm sm:pb-4 md:max-w-md lg:max-w-lg xl:max-w-xl"
     >
-      <div className="bg-muted relative h-56 w-full p-1 sm:h-80 sm:p-2 md:h-96 md:p-3 lg:h-[28rem] lg:p-4 xl:h-108">
+      <div className="bg-muted relative h-40 w-full p-1 sm:h-80 sm:p-2 md:h-96 md:p-3 lg:h-[28rem] lg:p-4 xl:h-108">
         <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
           {movie.metadata === undefined && imageSrc === undefined ? (
             <Loader2 className="h-8 w-8 animate-spin" />
           ) : imageSrc || movie.metadata?.Poster ? (
             <Image
               unoptimized
-              src={imageSrc ?? movie.metadata?.Poster!}
+              src={imageSrc ?? movie.metadata?.Poster ?? ""}
               alt={movie.title}
               width={180}
               height={270}
@@ -46,7 +46,7 @@ export function MovieCard({
               onError={(e) => {
                 if (imageSrc && imageSrc?.endsWith(".avif")) {
                   console.log("Replacing avif with jpg for movie:", movie.title);
-                  const newImageSrc = imageSrc.replace("QL90_UY600_CR1,1,400,600.avif", ".jpg");
+                  const newImageSrc = imageSrc.replace(`${QUALITY_SETTINGS}.avif`, ".jpg");
                   setImageSrc(newImageSrc);
                 } else {
                   console.error("Error loading poster for movie:", movie.title, e);
