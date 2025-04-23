@@ -26,6 +26,7 @@ export default function Home() {
   const [recommendations, setRecommendations] = useState<null | MovieRecommendationWithMetadata[]>(null);
   const [selectedMovie, setSelectedMovie] = useState<MovieRecommendationWithMetadata | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [prompts, setPrompts] = useState<string[]>(promptExamples);
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function Home() {
   async function handleSearch() {
     console.log("Searching for movies...", inputValue);
     setRecommendations(null);
+    setIsGenerating(true);
     const { value } = await streamMovieRecommendations(inputValue);
 
     for await (const movies of readStreamableValue(value)) {
@@ -65,6 +67,7 @@ export default function Home() {
         setRecommendations(null);
       }
     }
+    setIsGenerating(false);
   }
 
   function handleMovieError(movie: MovieRecommendationWithMetadata) {
@@ -117,7 +120,8 @@ export default function Home() {
             />
             <button
               onClick={handleSearch}
-              className="bg-foreground hover:bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-lg font-semibold whitespace-nowrap transition-colors sm:w-auto md:px-6 md:py-4 md:text-2xl"
+              className="bg-foreground hover:bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-lg font-semibold whitespace-nowrap transition-colors disabled:opacity-50 sm:w-auto md:px-6 md:py-4 md:text-2xl"
+              disabled={inputValue.length === 0 || isGenerating}
             >
               <Search strokeWidth={2.5} className="h-5 w-5 md:h-7 md:w-7" />
               <div>Search</div>
