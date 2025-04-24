@@ -18,6 +18,7 @@ const righteous = Righteous({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://moviewizard.me"),
   title: "Movie Wizard",
   description: "AI-curated movie recommendations.",
   openGraph: {
