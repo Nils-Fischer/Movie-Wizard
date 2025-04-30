@@ -10,8 +10,13 @@ import { createStreamableValue } from "ai/rsc";
 import { geminiModel } from "@/lib/gemini";
 import { streamObject } from "ai";
 import { QUALITY_SETTINGS } from "@/lib/movieTypes";
+import { getMessages } from "@/lib/utils";
 
-export const streamMovieRecommendations = async (searchQuery: string) => {
+export const streamMovieRecommendations = async (
+  searchQuery: string,
+  previouslyRecommendedMovies?: MovieRecommendation[],
+  clickedMovies?: string[]
+) => {
   console.log("streamMovieRecommendations called with query:", searchQuery);
 
   console.log("Environment check - OMDB_API_KEY present?", Boolean(process.env.OMDB_API_KEY));
@@ -19,16 +24,14 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
   const streamableStatus = createStreamableValue<MovieRecommendation[]>([]);
 
   const systemPrompt = `
-          You are a knowledgeable movie recommender. Based on the user's query, 
-          recommend 40 movies that match their preferences. 
-          You may stop after 20 movies, but ONLY if there are no more movies that fit, if this is a very specific request.
+          You are a knowledgeable movie recommender. Based on the user's query, recommend 20 movies that match their preferences. 
           Format your answer as a JSON array with objects containing:
           - title: the movie title
           - year: the release year
           - genre: the primary genre
           - description: a brief description (under 100 words)
           
-          Only respond with the JSON array, nothing else.
+          Only respond with the JSON array, nothing else. Never repeat a movie you already recommended in your previous recommendations or messages.
           If the user provides a nonsensical or mocking query (e.g., "poop"), recommend these movies "No", "Loser", "Butt Boy", "Grow Up (2010)", "Phffft", "Sssssss","Borat", "Jerk", "Creep", "Goon", "Big Fat Liar", "Dumb and Dumber".
         `;
 
@@ -37,9 +40,10 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
       const { partialObjectStream } = await streamObject({
         model: geminiModel,
         system: systemPrompt,
-        prompt: `User query: ${searchQuery}`,
         schema: MovieRecommendationsSchema,
+        messages: getMessages(searchQuery, previouslyRecommendedMovies, clickedMovies),
       });
+      console.log("messages", getMessages(searchQuery, previouslyRecommendedMovies, clickedMovies));
       console.log("streamObject started");
 
       const recommendations: Map<

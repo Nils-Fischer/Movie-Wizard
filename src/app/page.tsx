@@ -7,12 +7,14 @@ import { useState, useEffect } from "react";
 import { streamMovieRecommendations } from "@/app/actions";
 import { useSearchParams } from "next/navigation";
 import { readStreamableValue } from "ai/rsc";
-import { MovieRecommendationWithMetadata } from "@/lib/movieTypes";
+import { MovieRecommendation, MovieRecommendationWithMetadata } from "@/lib/movieTypes";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieModal } from "@/components/MovieModal";
 import React from "react";
 import { Marquee } from "@/components/magicui/marquee";
 import { promptExamples, shuffleArray } from "@/lib/promptExamples";
+import { movieRecommendationKey } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -27,13 +29,16 @@ export default function Home() {
   const [selectedMovie, setSelectedMovie] = useState<MovieRecommendationWithMetadata | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [clickedMovies, setClickedMovies] = useState<string[]>([]);
 
   const [prompts, setPrompts] = useState<string[]>(promptExamples);
+
   useEffect(() => {
     setPrompts(shuffleArray(promptExamples));
   }, []);
 
   function handleMovieClick(movie: MovieRecommendationWithMetadata) {
+    setClickedMovies([...(clickedMovies || []), movieRecommendationKey(movie)]);
     setSelectedMovie(movie);
     setIsModalOpen(true);
   }
@@ -46,13 +51,30 @@ export default function Home() {
   async function handleSearch() {
     console.log("Searching for movies...", inputValue);
     setRecommendations(null);
+    setClickedMovies([]);
+    streamRecommendations();
+  }
+
+  async function getMoreRecommendations() {
+    if (!recommendations) return;
+    const previouslyRecommendedMovies = recommendations.map((recommendation) => ({
+      title: recommendation.title,
+      year: recommendation.year,
+      description: recommendation.description,
+      genre: recommendation.genre,
+    }));
+    streamRecommendations(previouslyRecommendedMovies);
+  }
+
+  async function streamRecommendations(previouslyRecommendedMovies?: MovieRecommendation[]) {
     setIsGenerating(true);
-    const { value } = await streamMovieRecommendations(inputValue);
+    const { value } = await streamMovieRecommendations(inputValue, previouslyRecommendedMovies, clickedMovies);
 
     for await (const movies of readStreamableValue(value)) {
       if (movies) {
+        const allMovies = [...(previouslyRecommendedMovies || []), ...movies];
         const uniqueMovies = Array.from(
-          movies
+          allMovies
             .reduce((map, movie) => {
               const key = `${movie.title}-${movie.year}`;
               if (!map.has(key)) {
@@ -63,8 +85,6 @@ export default function Home() {
             .values()
         );
         setRecommendations(uniqueMovies);
-      } else {
-        setRecommendations(null);
       }
     }
     setIsGenerating(false);
@@ -140,7 +160,7 @@ export default function Home() {
               {recommendations.map((recommendation) => {
                 return (
                   <MovieCard
-                    key={`${recommendation.title}-${recommendation.year}`}
+                    key={movieRecommendationKey(recommendation)}
                     movie={recommendation}
                     onClick={() => handleMovieClick(recommendation)}
                     handleError={() => handleMovieError(recommendation)}
@@ -148,6 +168,13 @@ export default function Home() {
                 );
               })}
             </div>
+            {!isGenerating && (
+              <div className="mt-8 flex justify-center">
+                <Button onClick={getMoreRecommendations} className="px-6 py-2 text-lg font-medium" size="lg">
+                  More Recommendations
+                </Button>
+              </div>
+            )}
           </div>
         </ScrollToComponent>
       ) : (
