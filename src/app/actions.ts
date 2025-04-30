@@ -21,7 +21,7 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
   const systemPrompt = `
           You are a knowledgeable movie recommender. Based on the user's query, 
           recommend 40 movies that match their preferences. 
-          You may stop after 10 movies, but ONLY if there are no more movies that fit, if this is a very specific request.
+          You may stop after 20 movies, but ONLY if there are no more movies that fit, if this is a very specific request.
           Format your answer as a JSON array with objects containing:
           - title: the movie title
           - year: the release year
