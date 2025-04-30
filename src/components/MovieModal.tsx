@@ -68,112 +68,118 @@ export function MovieModal({ movie, isOpen, onClose }: MovieModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-160 overflow-y-auto sm:max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl">
-        <DialogHeader className="mb-4 items-center justify-center pr-6">
-          <DialogTitle className="text-2xl font-bold md:text-3xl lg:text-4xl">{Title}</DialogTitle>
-          <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm sm:text-base">
-            {Year && <span>{Year}</span>}
-            {Rated && Rated !== "N/A" && (
-              <>
-                <span>•</span>
-                <Badge variant="outline" className="px-1.5 py-0.5 text-xs">
-                  {Rated}
-                </Badge>
-              </>
-            )}
-            {Runtime && Runtime !== "N/A" && (
-              <>
-                <span>•</span>
-                <span>{Runtime}</span>
-              </>
+        <div className="flex flex-col md:flex-row md:gap-6">
+          {/* Poster - moves under header on mobile, beside header on md+ screens */}
+          <div className="my-4 md:mt-0 md:w-1/3">
+            {poster && poster !== "N/A" ? (
+              <ProgressiveImage
+                lowQualitySrc={movie.metadata?.Poster}
+                highQualitySrc={poster}
+                alt={`Poster for ${Title}`}
+                width={200}
+                height={300}
+                className="h-auto w-full rounded-lg object-cover shadow-md"
+                quality={90}
+                priority
+              />
+            ) : (
+              <div className="bg-muted text-muted-foreground flex h-full min-h-[300px] w-full items-center justify-center rounded-lg">
+                No Poster Available
+              </div>
             )}
           </div>
-        </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {poster && poster !== "N/A" ? (
-            <ProgressiveImage
-              lowQualitySrc={movie.metadata?.Poster}
-              highQualitySrc={poster}
-              alt={`Poster for ${Title}`}
-              width={200}
-              height={300}
-              className="h-auto w-full rounded-lg object-cover shadow-md"
-              quality={90}
-              priority
-            />
-          ) : (
-            <div className="bg-muted text-muted-foreground flex h-full min-h-[450px] w-full items-center justify-center rounded-lg">
-              No Poster Available
-            </div>
-          )}
-
-          <div className="space-y-6 md:col-span-2">
-            <div>
-              <h3 className="mb-2 text-xl font-semibold">Plot Summary</h3>
-              <p className="text-muted-foreground">{Plot}</p>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="mb-3 text-xl font-semibold">Details</h3>
-              <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
-                <DetailItem icon={FilmIcon} label="Genre" value={Genre} />
-                <DetailItem icon={CalendarIcon} label="Released" value={Released} />
-                <DetailItem icon={GlobeIcon} label="Language" value={Language} />
-                <DetailItem icon={GlobeIcon} label="Country" value={Country} />
-                <DetailItem icon={UsersIcon} label="Director" value={Director} />
-                <DetailItem icon={UsersIcon} label="Writer" value={Writer} />
-                <DetailItem icon={UsersIcon} label="Actors" value={Actors} />
-                {Awards && Awards !== "N/A" && <DetailItem icon={AwardIcon} label="Awards" value={Awards} />}
-                {Production && Production !== "N/A" && (
-                  <DetailItem icon={BuildingIcon} label="Production" value={Production} />
+          {/* Header and content */}
+          <div className="md:w-2/3">
+            <DialogHeader className="mb-4 items-start justify-start pr-6">
+              <DialogTitle className="text-2xl font-bold md:text-3xl lg:text-4xl">{Title}</DialogTitle>
+              <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm sm:text-base">
+                {Year && <span>{Year}</span>}
+                {Rated && Rated !== "N/A" && (
+                  <>
+                    <span>•</span>
+                    <Badge variant="outline" className="px-1.5 py-0.5 text-xs">
+                      {Rated}
+                    </Badge>
+                  </>
                 )}
-                {BoxOffice && BoxOffice !== "N/A" && (
-                  <DetailItem icon={DollarSignIcon} label="Box Office" value={BoxOffice} />
-                )}
-                {Website && Website !== "N/A" && (
-                  <DetailItem icon={LinkIcon} label="Website" value={Website} link={Website} />
+                {Runtime && Runtime !== "N/A" && (
+                  <>
+                    <span>•</span>
+                    <span>{Runtime}</span>
+                  </>
                 )}
               </div>
-            </div>
+            </DialogHeader>
 
-            <Separator />
+            <div className="space-y-6">
+              <div>
+                <h3 className="mb-2 text-xl font-semibold">Plot Summary</h3>
+                <p className="text-muted-foreground">{Plot}</p>
+              </div>
 
-            <div>
-              <h3 className="mb-3 text-xl font-semibold">Ratings</h3>
-              <div className="flex flex-wrap items-center gap-4">
-                {imdbRating && imdbRating !== "N/A" && (
-                  <RatingBadge
-                    source="IMDb"
-                    value={imdbRating}
-                    icon={StarIcon}
-                    svgSrc="/imdb.svg"
-                    link={getLink(movie.metadata, "IMDb")}
-                  />
-                )}
-                {ratingSources["Rotten Tomatoes"] && (
-                  <RatingBadge
-                    source="Rotten Tomatoes"
-                    value={ratingSources["Rotten Tomatoes"]}
-                    svgSrc="/rottentomatoes.svg"
-                    link={getLink(movie.metadata, "Rotten Tomatoes")}
-                  />
-                )}
-                {Metascore && Metascore !== "N/A" && (
-                  <RatingBadge
-                    source="Metascore"
-                    value={`${Metascore}/100`}
-                    svgSrc="/metascore.svg"
-                    link={getLink(movie.metadata, "Metascore")}
-                  />
-                )}
+              <Separator />
+
+              <div>
+                <h3 className="mb-3 text-xl font-semibold">Details</h3>
+                <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
+                  <DetailItem icon={FilmIcon} label="Genre" value={Genre} />
+                  <DetailItem icon={CalendarIcon} label="Released" value={Released} />
+                  <DetailItem icon={GlobeIcon} label="Language" value={Language} />
+                  <DetailItem icon={GlobeIcon} label="Country" value={Country} />
+                  <DetailItem icon={UsersIcon} label="Director" value={Director} />
+                  <DetailItem icon={UsersIcon} label="Writer" value={Writer} />
+                  <DetailItem icon={UsersIcon} label="Actors" value={Actors} />
+                  {Awards && Awards !== "N/A" && <DetailItem icon={AwardIcon} label="Awards" value={Awards} />}
+                  {Production && Production !== "N/A" && (
+                    <DetailItem icon={BuildingIcon} label="Production" value={Production} />
+                  )}
+                  {BoxOffice && BoxOffice !== "N/A" && (
+                    <DetailItem icon={DollarSignIcon} label="Box Office" value={BoxOffice} />
+                  )}
+                  {Website && Website !== "N/A" && (
+                    <DetailItem icon={LinkIcon} label="Website" value={Website} link={Website} />
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="mb-3 text-xl font-semibold">Ratings</h3>
+                <div className="flex flex-wrap items-center gap-4">
+                  {imdbRating && imdbRating !== "N/A" && (
+                    <RatingBadge
+                      source="IMDb"
+                      value={imdbRating}
+                      icon={StarIcon}
+                      svgSrc="/imdb.svg"
+                      link={getLink(movie.metadata, "IMDb")}
+                    />
+                  )}
+                  {ratingSources["Rotten Tomatoes"] && (
+                    <RatingBadge
+                      source="Rotten Tomatoes"
+                      value={ratingSources["Rotten Tomatoes"]}
+                      svgSrc="/rottentomatoes.svg"
+                      link={getLink(movie.metadata, "Rotten Tomatoes")}
+                    />
+                  )}
+                  {Metascore && Metascore !== "N/A" && (
+                    <RatingBadge
+                      source="Metascore"
+                      value={`${Metascore}/100`}
+                      svgSrc="/metascore.svg"
+                      link={getLink(movie.metadata, "Metascore")}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <DialogFooter className="mt-6">
+        <DialogFooter className="mt-6 md:hidden">
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
