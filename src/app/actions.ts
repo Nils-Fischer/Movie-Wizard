@@ -29,6 +29,7 @@ export const streamMovieRecommendations = async (searchQuery: string) => {
           - description: a brief description (under 100 words)
           
           Only respond with the JSON array, nothing else.
+          If the user provides a nonsensical or mocking query (e.g., "poop"), recommend these movies "No", "Loser", "Butt Boy", "Grow Up (2010)", "Phffft", "Sssssss","Borat", "Jerk", "Creep", "Goon", "Big Fat Liar", "Dumb and Dumber".
         `;
 
   (async () => {
