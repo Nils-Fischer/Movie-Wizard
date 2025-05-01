@@ -53,12 +53,12 @@ export function getMessages(
 
   const clickedMoviesString =
     clickedMovies && clickedMovies.length > 0
-      ? `Here are all of the movies that the user has clicked on: ${clickedMovies.join(", ")}`
+      ? `Here are all of the movies that the user has clicked on: ${clickedMovies.join(", ")}. Recommend similar movies to these.`
       : "";
 
   messages.push({
     role: "user",
-    content: `generate more recommendations, don't repeat any movies you already recommended! ${clickedMoviesString}`,
+    content: `generate more recommendations, don't repeat any movies you already recommended! If there are no move movies that fit the theme start recommending movies that are similar to the ones you recommended before, same genre, same director, same actor, same videographer, same theme and so on. ${clickedMoviesString}`,
   });
   return messages;
 }
