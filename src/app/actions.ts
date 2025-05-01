@@ -11,6 +11,7 @@ import { geminiModel } from "@/lib/gemini";
 import { streamObject } from "ai";
 import { QUALITY_SETTINGS } from "@/lib/movieTypes";
 import { getMessages } from "@/lib/utils";
+import { getCache, setCache } from "@/lib/redis";
 
 export const streamMovieRecommendations = async (
   searchQuery: string,
@@ -107,8 +108,20 @@ export const streamMovieRecommendations = async (
 export async function getMovieMetadata(title: string, year: string): Promise<OmdbMovieData | null> {
   const apiKey = process.env.OMDB_API_KEY;
   const apiUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(title)}&y=${encodeURIComponent(year)}`;
-  console.log("getMovieMetadata called for", title, year, { OMDB_API_KEY_present: Boolean(apiKey), apiUrl });
+  const cacheKey = `movie-metadata:${title}:${year}`;
 
+  // 1. Check cache first
+  try {
+    const cachedData = await getCache<OmdbMovieData>(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    }
+  } catch (error) {
+    console.warn("Error checking Redis cache:", error);
+  }
+
+  // 2. Fetch from API if not in cache
+  console.log(`Cache miss for ${cacheKey}, fetching from OMDb...`);
   try {
     let response = await fetch(apiUrl, {
       next: {
@@ -121,7 +134,7 @@ export async function getMovieMetadata(title: string, year: string): Promise<Omd
       response = await fetch(apiUrl, {
         next: {
           revalidate: 3600 * 24, // 1 day
-          tags: [`movie-metadata-${title}-${year}`],
+          tags: [cacheKey],
         },
       });
       if (!response.ok) {
@@ -138,6 +151,7 @@ export async function getMovieMetadata(title: string, year: string): Promise<Omd
       } else {
         console.log(`Movie not found in OMDb: ${title} (${year})`);
       }
+      await setCache(cacheKey, null);
       return null;
     }
 
@@ -146,6 +160,9 @@ export async function getMovieMetadata(title: string, year: string): Promise<Omd
     } else {
       data.Poster = undefined;
     }
+
+    // 3. Cache the result before returning
+    await setCache(cacheKey, data);
 
     return data;
   } catch (error) {
