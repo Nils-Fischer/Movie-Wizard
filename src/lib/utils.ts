@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { MovieRecommendation } from "./movieTypes";
-import { CoreMessage, generateId, Message } from "ai";
+import { CoreMessage } from "ai";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
