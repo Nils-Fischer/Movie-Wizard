@@ -10,4 +10,4 @@ const genAI = createGoogleGenerativeAI({
 });
 
 // Get the Gemini model
-export const geminiModel = genAI("gemini-2.0-flash");
+export const geminiModel = genAI("gemini-2.5-flash");
