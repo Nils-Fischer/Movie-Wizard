@@ -42,11 +42,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children, modal }: LayoutProps<"/">) {
   return (
     <html lang="en">
       <head>
@@ -56,7 +52,10 @@ export default function RootLayout({
       <body className={cn("bg-background min-h-screen font-sans antialiased", geistSans.variable, righteous.variable)}>
         <SpeedInsights />
         <Analytics />
-        <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
+          {children}
+          {modal}
+        </Suspense>
       </body>
     </html>
   );
